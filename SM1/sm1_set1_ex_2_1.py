@@ -79,7 +79,7 @@ def solve_by_transfer_matrix(T_sym: sp.Symbol, N: int, J: float, k: float, B: fl
     Returns:
         sp.Expr: The symbolic partition function Z(T).
     """
-    print("  Calculating eigenvalues for B != 0...")
+    print("  Calculating eigenvalues for B != 0 (Exact)...")
     
     # --- This is the new, more general eigenvalue calculation ---
     # The B=0 case (cosh, sinh) was a simplification of this.
@@ -104,7 +104,7 @@ def solve_by_transfer_matrix(T_sym: sp.Symbol, N: int, J: float, k: float, B: fl
 def solve_by_lambda_approximation(T_sym: sp.Symbol, N: int, J: float, k: float, B: float) -> sp.Expr:
     """
     Calculates the symbolic partition function Z(T) using the
-    closed-form Transfer Matrix eigenvalues for B != 0.
+    lambda_1^N approximation. This is valid for large N.
     
     Args:
         T_sym (sp.Symbol): The symbolic variable for Temperature.
@@ -116,7 +116,7 @@ def solve_by_lambda_approximation(T_sym: sp.Symbol, N: int, J: float, k: float, 
     Returns:
         sp.Expr: The symbolic partition function Z(T).
     """
-    print("  Calculating eigenvalues for B != 0...")
+    print("  Calculating eigenvalues for B != 0 (Approximation)...")
     
     # --- This is the new, more general eigenvalue calculation ---
     # The B=0 case (cosh, sinh) was a simplification of this.
@@ -132,10 +132,10 @@ def solve_by_lambda_approximation(T_sym: sp.Symbol, N: int, J: float, k: float, 
     
     lambda_1 = term1 + term2
     
-    # The partition function is still the sum of eigenvalues to the Nth power
-    Z_transfer = lambda_1**N
+    # The partition function is approximated by just the largest eigenvalue
+    Z_approx = lambda_1**N
     
-    return Z_transfer
+    return Z_approx
 
 
 def derive_thermo_properties(Z_sym: sp.Expr, T_sym: sp.Symbol, k: float) -> tuple[sp.Expr, sp.Expr]:
@@ -163,12 +163,12 @@ def derive_thermo_properties(Z_sym: sp.Expr, T_sym: sp.Symbol, k: float) -> tupl
 
 def plot_properties(Z_brute: sp.Expr, Z_transfer: sp.Expr, Z_lambda: sp.Expr, T_sym: sp.Symbol, title: str):
     """
-    Plots the given symbolic Z(T), E(T), and Cv(T) functions.
+    Plots the given symbolic Z(T) functions.
     
     Args:
-        Z_sym (sp.Expr): Symbolic Partition Function.
-        E_sym (sp.Expr): Symbolic Average Energy.
-        Cv_sym (sp.Expr): Symbolic Specific Heat.
+        Z_brute (sp.Expr): Symbolic Partition Function (Brute Force).
+        Z_transfer (sp.Expr): Symbolic Partition Function (Transfer Matrix).
+        Z_lambda (sp.Expr): Symbolic Partition Function (Lambda Approx).
         T_sym (sp.Symbol): The symbolic variable T.
         title (str): Title for the plot.
     """
@@ -187,28 +187,24 @@ def plot_properties(Z_brute: sp.Expr, Z_transfer: sp.Expr, Z_lambda: sp.Expr, T_
     Z_transfer_plot = Z_transfer_func(T_values)
     Z_lambda_plot = Z_lambda_func(T_values)
 
-    # Create the plots (3 rows, 1 column)
-    _, (ax1) = plt.subplots(1, 1, figsize=(10, 12), sharex=True)
+    # Create the plots (1 row, 1 column)
+    _, (ax1) = plt.subplots(1, 1, figsize=(10, 8), sharex=True)
 
     # Plot partition function - Brute Force
-    ax1.plot(T_values, Z_transfer_plot, label='Partition Function Z(T) transfer', color='blue')
-    ax1.plot(T_values, Z_brute_plot, label='Partition Function Z(T) brute', color='green')
+    ax1.plot(T_values, Z_transfer_plot, label='Z(T) Transfer (Exact)', color='blue')
+    ax1.plot(T_values, Z_brute_plot, label='Z(T) Brute Force (Exact)', color='green', linestyle='--')
+    
+    # Plot partition function - Lambda Approximation
+    ax1.plot(T_values, Z_lambda_plot, label='Z(T) Approx. ($\lambda_1^N$)', color='red', linestyle=':') # <-- FIX: Corrected label
+    
     ax1.set_ylabel('Z (log scale)')
     ax1.set_yscale('log') # Z grows very fast, log scale is better
     ax1.set_title(title)
     ax1.grid(True)
-
-    # Plot partition function - Transfer Matrix
-    # ax2.set_ylabel('Z (log scale)')
-    # ax2.set_yscale('log') # Z grows very fast, log scale is better
-    # ax2.grid(True)
-
-    # Plot partition function - Lambda Approximation
-    ax1.plot(T_values, Z_lambda_plot, label='Partition Function Z(T) transfer', color='red')
-    # ax3.set_ylabel('Z (log scale)')
-    # ax3.set_yscale('log') # Z grows very fast, log scale is better
-    # ax3.grid(True)
-
+    ax1.legend()
+    
+    plt.xlabel('Temperature (T)')
+    plt.tight_layout()
     plt.show()
 
 
@@ -217,12 +213,12 @@ if __name__ == "__main__":
     N = 6
     J = 1
     k = 1
-    B = 0  # <-- NEW: Set magnetic field
+    B = 0  # <-- Set magnetic field (try 0, 0.5, 1.0)
     T = sp.symbols('T') # Our main symbolic variable
     
     print(f"--- 1D Ising Model Comparison (N={N}, J={J}, k={k}, B={B}) ---")
     
-    # --- 3. Run Method A: Brute Force ---
+    # --- 2. Run Method A: Brute Force ---
     print("\n[Method A: Brute Force Enumeration]")
     Z_brute = solve_by_brute_force(T, N, J, k, B)
 
@@ -234,31 +230,28 @@ if __name__ == "__main__":
     sp.pprint(Z_brute_simplified)
     # sp.preview(Z_brute_simplified)
 
-    # --- 2. Run Method B: Transfer Matrix ---
-    print("\n[Method B: Transfer Matrix]")
+    # --- 3. Run Method B: Transfer Matrix ---
+    print("\n[Method B: Transfer Matrix (Exact)]")
     Z_transfer = solve_by_transfer_matrix(T, N, J, k, B)
     print("Symbolic Z(T) (Transfer Matrix):")
     sp.pprint(Z_transfer)
     # sp.preview(Z_transfer)
 
-    # --- 3. Run Method C: Lambda Approximation ---
-    print("\n[Method C: Lambda Approximation]")
+    # --- 4. Run Method C: Lambda Approximation ---
+    print("\n[Method C: Lambda Approximation (N -> inf)]")
     Z_lambda = solve_by_lambda_approximation(T, N, J, k, B)
     print("Symbolic Z(T) (Lambda Approximation):")
     sp.pprint(Z_lambda)
     # sp.preview(Z_lambda) 
     
-    # --- 4. Compare the Two Methods ---
-    print("\n[Comparison]")
+    # --- 5. Compare the Two Exact Methods ---
+    print("\n[Comparison: Brute vs Transfer]")
     # We must .expand() the transfer matrix form to compare it
     # to the simplified sum-of-exponentials form.
     print("  Simplifying (Z_transfer.expand() - Z_brute_simplified)...")
 
     # Note: This simplification can be very slow with B!=0
     # We can test equality in a faster way
-    
-    # Test 1: Fast symbolic simplification
-    # difference = sp.simplify(Z_transfer.expand() - Z_brute_simplified)
     
     # Test 2: Numerical test (faster)
     # If they are the same, their difference is 0.
@@ -289,14 +282,14 @@ if __name__ == "__main__":
             # exit()
 
 
-    # --- 5. Derive Properties and Plot ---
+    # --- 6. Derive Properties and Plot ---
     print("\n[Derivation and Plotting]")
     
     plot_title = f"1D Ising Model (N={N}, J={J}, B={B}, k={k}) - Multiple Methods Comparison"
     plot_properties(
-        Z_brute_simplified, # <-- Pass Z_sym to the plot function
-        Z_transfer, # <-- Pass Z_sym to the plot function
-        Z_lambda,
+        Z_brute_simplified, # <-- Pass Z_brute to the plot function
+        Z_transfer,         # <-- Pass Z_transfer to the plot function
+        Z_lambda,           # <-- Pass Z_lambda to the plot function
         T, 
         title=plot_title
     )
