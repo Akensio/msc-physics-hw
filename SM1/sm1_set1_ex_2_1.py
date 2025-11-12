@@ -124,11 +124,12 @@ def derive_thermo_properties(Z_sym: sp.Expr, T_sym: sp.Symbol, k: float) -> tupl
     
     return E_sym, Cv_sym
 
-def plot_properties(E_sym: sp.Expr, Cv_sym: sp.Expr, T_sym: sp.Symbol, title: str):
+def plot_properties(Z_sym: sp.Expr, E_sym: sp.Expr, Cv_sym: sp.Expr, T_sym: sp.Symbol, title: str):
     """
-    Plots the given symbolic E(T) and Cv(T) functions. (Unchanged)
+    Plots the given symbolic Z(T), E(T), and Cv(T) functions.
     
     Args:
+        Z_sym (sp.Expr): Symbolic Partition Function.
         E_sym (sp.Expr): Symbolic Average Energy.
         Cv_sym (sp.Expr): Symbolic Specific Heat.
         T_sym (sp.Symbol): The symbolic variable T.
@@ -136,6 +137,7 @@ def plot_properties(E_sym: sp.Expr, Cv_sym: sp.Expr, T_sym: sp.Symbol, title: st
     """
     print("  Generating numerical functions for plotting...")
     # Use lambdify to convert symbolic expressions to fast numpy functions
+    Z_func = sp.lambdify(T_sym, Z_sym, 'numpy')
     E_func = sp.lambdify(T_sym, E_sym, 'numpy')
     Cv_func = sp.lambdify(T_sym, Cv_sym, 'numpy')
 
@@ -144,29 +146,29 @@ def plot_properties(E_sym: sp.Expr, Cv_sym: sp.Expr, T_sym: sp.Symbol, title: st
     T_values = np.linspace(0.1, 5.0, 200) # Start from 0.1, not 0
 
     # Calculate the properties at those T values
+    Z_plot = Z_func(T_values)
     E_plot = E_func(T_values)
     Cv_plot = Cv_func(T_values)
 
-    # Create the plots
-    _, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+    # Create the plots (3 rows, 1 column)
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 12), sharex=True)
 
-    # Plot Average Energy
-    ax1.plot(T_values, E_plot, label='Average Energy E(T)', color='blue')
-    ax1.set_ylabel('Energy E')
+    # Plot Partition Function
+    ax1.plot(T_values, Z_plot, label='Partition Function Z(T)', color='green')
+    ax1.set_ylabel('Z (log scale)')
+    ax1.set_yscale('log') # Z grows very fast, log scale is better
     ax1.set_title(title)
     ax1.grid(True)
 
-    # Plot Specific Heat
-    ax2.plot(T_values, Cv_plot, label='Specific Heat $C_v(T)$', color='red')
-    ax2.set_xlabel('Temperature (T)')
-    ax2.set_ylabel('Specific Heat $C_v$')
+    # Plot Average Energy
+    ax2.plot(T_values, E_plot, label='Average Energy E(T)', color='blue')
+    ax2.set_ylabel('Energy E')
     ax2.grid(True)
-    
-    plt.tight_layout()
-    plt.show()
 
-# --- Main execution block ---
-if __name__ == "__main__":
+    # Plot Specific Heat
+    ax3.plot(T_values, Cv_plot, label='Specific Heat $C_v(T)$', color='red')
+    ax3.set_xlabel('Temperature (T)')
+    ax3.set_ylabel('Specific Heat $C_v$')
     
     # --- 1. Setup ---
     N = 6
@@ -243,6 +245,7 @@ if __name__ == "__main__":
     
     plot_title = f"1D Ising Model (N={N}, J={J}, B={B}) - Methods Verified"
     plot_properties(
+        Z_transfer, # <-- Pass Z_sym to the plot function
         E_sym, 
         Cv_sym, 
         T, 
