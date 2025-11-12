@@ -180,7 +180,7 @@ def plot_properties(Z_brute: sp.Expr, Z_transfer: sp.Expr, Z_lambda: sp.Expr, T_
 
     print("  Generating plot...")
     # Create a range of numerical T values
-    T_values = np.linspace(0.1, 5.0, 200) # Start from 0.1, not 0
+    T_values = np.linspace(0.1, 2, 1000) # Start from 0.1, not 0
 
     # Calculate the properties at Z_brute_func T values
     Z_brute_plot = Z_brute_func(T_values)
@@ -191,6 +191,7 @@ def plot_properties(Z_brute: sp.Expr, Z_transfer: sp.Expr, Z_lambda: sp.Expr, T_
     _, (ax1) = plt.subplots(1, 1, figsize=(10, 12), sharex=True)
 
     # Plot partition function - Brute Force
+    ax1.plot(T_values, Z_transfer_plot, label='Partition Function Z(T) transfer', color='blue')
     ax1.plot(T_values, Z_brute_plot, label='Partition Function Z(T) brute', color='green')
     ax1.set_ylabel('Z (log scale)')
     ax1.set_yscale('log') # Z grows very fast, log scale is better
@@ -198,7 +199,6 @@ def plot_properties(Z_brute: sp.Expr, Z_transfer: sp.Expr, Z_lambda: sp.Expr, T_
     ax1.grid(True)
 
     # Plot partition function - Transfer Matrix
-    ax1.plot(T_values, Z_transfer_plot, label='Partition Function Z(T) transfer', color='blue')
     # ax2.set_ylabel('Z (log scale)')
     # ax2.set_yscale('log') # Z grows very fast, log scale is better
     # ax2.grid(True)
@@ -232,21 +232,21 @@ if __name__ == "__main__":
     
     print("Symbolic Z(T) (Brute Force, Simplified):")
     sp.pprint(Z_brute_simplified)
-    sp.preview(Z_brute_simplified)
+    # sp.preview(Z_brute_simplified)
 
     # --- 2. Run Method B: Transfer Matrix ---
     print("\n[Method B: Transfer Matrix]")
     Z_transfer = solve_by_transfer_matrix(T, N, J, k, B)
     print("Symbolic Z(T) (Transfer Matrix):")
     sp.pprint(Z_transfer)
-    sp.preview(Z_transfer)
+    # sp.preview(Z_transfer)
 
     # --- 3. Run Method C: Lambda Approximation ---
     print("\n[Method C: Lambda Approximation]")
     Z_lambda = solve_by_lambda_approximation(T, N, J, k, B)
     print("Symbolic Z(T) (Lambda Approximation):")
     sp.pprint(Z_lambda)
-    sp.preview(Z_lambda) 
+    # sp.preview(Z_lambda) 
     
     # --- 4. Compare the Two Methods ---
     print("\n[Comparison]")
@@ -292,7 +292,7 @@ if __name__ == "__main__":
     # --- 5. Derive Properties and Plot ---
     print("\n[Derivation and Plotting]")
     
-    plot_title = f"1D Ising Model (N={N}, J={J}, B={B}) - Multiple Methods Comparison"
+    plot_title = f"1D Ising Model (N={N}, J={J}, B={B}, k={k}) - Multiple Methods Comparison"
     plot_properties(
         Z_brute_simplified, # <-- Pass Z_sym to the plot function
         Z_transfer, # <-- Pass Z_sym to the plot function
