@@ -45,7 +45,7 @@ def solve_by_brute_force(T_sym: sp.Symbol, N: int, J: float, k: float, B: float)
         sp.Expr: The symbolic partition function Z(T).
     """
     print(f"  Enumerating all 2^{N} = {2**N} states...")
-    Z_brute = 0  # Initialize the partition function
+    Z_brute = sp.sympify(0)  # <-- FIX 1: Initialize as a SymPy object
     
     num_states = 2**N
     
@@ -101,7 +101,7 @@ def solve_by_transfer_matrix(T_sym: sp.Symbol, N: int, J: float, k: float, B: fl
     
     return Z_transfer
 
-def derive_thermo_properties(Z_sym: sp.Expr, T_sym: sp.Symbol, k: float) -> (sp.Expr, sp.Expr):
+def derive_thermo_properties(Z_sym: sp.Expr, T_sym: sp.Symbol, k: float) -> tuple[sp.Expr, sp.Expr]:
     """
     Derives symbolic expressions for Energy (E) and Specific Heat (Cv)
     from a given partition function Z(T). (This function is unchanged)
