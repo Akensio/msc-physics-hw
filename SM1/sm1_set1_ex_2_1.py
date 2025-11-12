@@ -161,14 +161,18 @@ def derive_thermo_properties(Z_sym: sp.Expr, T_sym: sp.Symbol, k: float) -> tupl
     
     return E_sym, Cv_sym
 
-def plot_properties(Z_brute: sp.Expr, Z_transfer: sp.Expr, Z_lambda: sp.Expr, T_sym: sp.Symbol, title: str):
+def plot_properties(Z_brute: sp.Expr, Z_transfer: sp.Expr, Z_lambda: sp.Expr,
+                    diff_abs_sym: sp.Expr, diff_rel_sym: sp.Expr,
+                    T_sym: sp.Symbol, title: str):
     """
-    Plots the given symbolic Z(T) functions.
+    Plots the given symbolic Z(T) functions and the approximation error.
     
     Args:
         Z_brute (sp.Expr): Symbolic Partition Function (Brute Force).
         Z_transfer (sp.Expr): Symbolic Partition Function (Transfer Matrix).
         Z_lambda (sp.Expr): Symbolic Partition Function (Lambda Approx).
+        diff_abs_sym (sp.Expr): Symbolic absolute difference (Brute - Lambda).
+        diff_rel_sym (sp.Expr): Symbolic relative difference (Brute - Lambda) / Brute.
         T_sym (sp.Symbol): The symbolic variable T.
         title (str): Title for the plot.
     """
@@ -177,40 +181,64 @@ def plot_properties(Z_brute: sp.Expr, Z_transfer: sp.Expr, Z_lambda: sp.Expr, T_
     Z_brute_func = sp.lambdify(T_sym, Z_brute, 'numpy')
     Z_transfer_func = sp.lambdify(T_sym, Z_transfer, 'numpy')
     Z_lambda_func = sp.lambdify(T_sym, Z_lambda, 'numpy')
+    diff_abs_func = sp.lambdify(T_sym, diff_abs_sym, 'numpy')
+    diff_rel_func = sp.lambdify(T_sym, diff_rel_sym, 'numpy')
 
     print("  Generating plot...")
     # Create a range of numerical T values
-    T_values = np.linspace(0.1, 2, 1000) # Start from 0.1, not 0
+    T_values = np.linspace(0.1, 4, 1000) # Start from 0.1, not 0
 
     # Calculate the properties at Z_brute_func T values
     Z_brute_plot = Z_brute_func(T_values)
     Z_transfer_plot = Z_transfer_func(T_values)
     Z_lambda_plot = Z_lambda_func(T_values)
+    diff_abs_plot = diff_abs_func(T_values)
+    diff_rel_plot = diff_rel_func(T_values)
 
-    # Create the plots (1 row, 1 column)
-    _, (ax1) = plt.subplots(1, 1, figsize=(10, 8), sharex=True)
+    # --- Figure 1: Z Comparison ---
+    fig1, (ax1) = plt.subplots(1, 1, figsize=(10, 8))
 
     # Plot partition function - Brute Force
     ax1.plot(T_values, Z_transfer_plot, label='Z(T) Transfer (Exact)', color='blue')
-    ax1.plot(T_values, Z_brute_plot, label='Z(T) Brute Force (Exact)', color='green', linestyle='--')
+    ax1.plot(T_values, Z_brute_plot, label='Z(T) Brute Force (Exact)', color='yellow', linestyle='--')
     
     # Plot partition function - Lambda Approximation
     ax1.plot(T_values, Z_lambda_plot, label='Z(T) Approx. ($\lambda_1^N$)', color='red', linestyle=':') # <-- FIX: Corrected label
     
-    ax1.set_ylabel('Z (log scale)')
+    ax1.set_ylabel('Z (log scale)', fontsize=20)
     ax1.set_yscale('log') # Z grows very fast, log scale is better
     ax1.set_title(title)
     ax1.grid(True)
     ax1.legend()
     
-    plt.xlabel('Temperature (T)')
-    plt.tight_layout()
+    ax1.set_xlabel('Temperature [J/k]', fontsize=20) # Moved from bottom
+    fig1.tight_layout()
+    
+    # --- Figure 2: Approximation Error (Brute vs Lambda) ---
+    fig2, (ax2) = plt.subplots(1, 1, figsize=(10, 10), sharex=True)
+    fig2.suptitle("Approximation Error (Brute vs. Lambda Approx.)")
+    
+    # # Plot Absolute Difference
+    # ax2.plot(T_values, diff_abs_plot, label='Z_brute - Z_lambda', color='purple')
+    # ax2.set_ylabel('Absolute Difference')
+    # ax2.grid(True)
+    # ax2.legend()
+    
+    # Plot Relative Difference
+    ax2.plot(T_values, diff_rel_plot, label='(Z_brute - Z_lambda) / Z_brute', color='orange')
+    ax2.set_ylabel('Relative Difference (Error)')
+    ax2.set_xlabel('Temperature (T)')
+    ax2.grid(True)
+    ax2.legend()
+    
+    fig2.tight_layout(rect=[0, 0.03, 1, 0.96]) # Adjust layout for suptitle
+
     plt.show()
 
 
 if __name__ == "__main__":
     # --- 1. Setup ---
-    N = 6
+    N = 12
     J = 1
     k = 1
     B = 0  # <-- Set magnetic field (try 0, 0.5, 1.0)
@@ -282,14 +310,23 @@ if __name__ == "__main__":
             # exit()
 
 
-    # --- 6. Derive Properties and Plot ---
+    # --- 6. Calculate Differences for Plotting ---
+    print("\n[Calculating Differences vs Approximation]")
+    # Z_brute_simplified is the exact "brute" result
+    # Z_lambda is the approximation
+    diff_abs_sym = Z_brute_simplified - Z_lambda
+    diff_rel_sym = (Z_brute_simplified - Z_lambda) / Z_brute_simplified
+
+    # --- 7. Derive Properties and Plot ---
     print("\n[Derivation and Plotting]")
     
-    plot_title = f"1D Ising Model (N={N}, J={J}, B={B}, k={k}) - Multiple Methods Comparison"
+    plot_title = f"1D Ising Model (N={N}, J={J}, B={B}, k={k}) - Z(T) Comparison"
     plot_properties(
         Z_brute_simplified, # <-- Pass Z_brute to the plot function
         Z_transfer,         # <-- Pass Z_transfer to the plot function
         Z_lambda,           # <-- Pass Z_lambda to the plot function
+        diff_abs_sym,       # <-- NEW
+        diff_rel_sym,       # <-- NEW
         T, 
         title=plot_title
     )
