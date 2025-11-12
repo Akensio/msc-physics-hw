@@ -90,13 +90,25 @@ for vec_j in basis_vectors:
         rows[-1].append(result)
     print("-" * 60)  # Add a separator for each vec_j
 
+sympy.init_printing()
+
 transfer_matrix = sympy.Matrix(rows)
-sympy.preview(transfer_matrix)
+# sympy.preview(transfer_matrix)
 
-transfer_matrix_2_2_J_negative_1 = transfer_matrix.copy().subs({J_1: -1, J_2: -1, B: 0})
-sympy.preview(transfer_matrix_2_2_J_negative_1)
+transfer_matrix_2_2_J_negative_1: sympy.Matrix = transfer_matrix.copy().subs({J_1: -1, J_2: -1, B: 0})
+# sympy.preview(transfer_matrix_2_2_J_negative_1)
+print("\n\nLaTeX format of the transfer matrix for J=-1:")
+print(sympy.latex(transfer_matrix_2_2_J_negative_1))
+print("\nEigenvalues (J=-1):")
+eigenvals_2_2_J_negative_1 = transfer_matrix_2_2_J_negative_1.eigenvals()
+# print(sympy.simplify(eigenvals_2_2_J_negative_1))
+print(sympy.latex(eigenvals_2_2_J_negative_1))
 
-transfer_matrix_2_2_J_plus_1 = transfer_matrix.copy().subs({J_1: 1, J_2: 1, B: 0})
-sympy.preview(transfer_matrix_2_2_J_plus_1)
-# sympy.init_printing()
-# print(sympy.latex(transfer_matrix))
+transfer_matrix_2_2_J_plus_1: sympy.Matrix = transfer_matrix.copy().subs({J_1: 1, J_2: 1, B: 0})
+# sympy.preview(transfer_matrix_2_2_J_plus_1)
+print("\n\nLaTeX format of the transfer matrix for J=+1:")
+print(sympy.latex(transfer_matrix_2_2_J_plus_1))
+print("\nEigenvalues (J=+1):")
+eigenvals_2_2_J_plus_1 = transfer_matrix_2_2_J_plus_1.eigenvals()
+# print(sympy.simplify(eigenvals_2_2_J_plus_1))
+print(sympy.latex(sympy.simplify(eigenvals_2_2_J_plus_1)))
