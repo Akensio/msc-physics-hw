@@ -206,7 +206,7 @@ def plot_properties(F_brute: sp.Expr, F_transfer: sp.Expr, F_lambda: sp.Expr,
     ax1.plot(T_values, F_brute_plot, label='F(T) Brute Force (Exact)', color='yellow', linestyle='--')
     
     # Plot partition function - Lambda Approximation
-    ax1.plot(T_values, F_lambda_plot, label='F(T) Approx. ($\lambda_1^N$)', color='red', linestyle=':')
+    ax1.plot(T_values, F_lambda_plot, label='F(T) Approx. ($\\lambda_1^N$)', color='red', linestyle=':')
     
     ax1.set_ylabel('F', fontsize=20)
     # ax1.set_yscale('log') # Z grows very fast, log scale is better
@@ -313,12 +313,13 @@ if __name__ == "__main__":
     F_brute, _, _ = derive_thermo_properties(Z_brute_simplified, T, k)
     F_transfer, _ ,_ = derive_thermo_properties(Z_transfer, T, k)
     F_lambda, _ ,_ = derive_thermo_properties(Z_lambda, T, k)
-    # sp.preview(Z_brute_simplified, filename="Z_brute_simplified.png")
-    # sp.preview(F_brute, filename="F_brute.png")
-    # sp.preview(Z_transfer, filename="Z_transfer.png")
-    # sp.preview(F_transfer, filename="F_transfer.png")
-    # sp.preview(Z_lambda, filename="Z_lambda.png")
-    # sp.preview(F_lambda, filename="F_lambda.png")
+    sp.preview(Z_brute, viewer="file", filename="Z_brute.png")
+    sp.preview(Z_brute_simplified, viewer="file", filename="Z_brute_simplified.png")
+    sp.preview(F_brute, viewer="file", filename="F_brute.png")
+    sp.preview(Z_transfer, viewer="file", filename="Z_transfer.png")
+    sp.preview(F_transfer, viewer="file", filename="F_transfer.png")
+    sp.preview(Z_lambda, viewer="file", filename="Z_lambda.png")
+    sp.preview(F_lambda, viewer="file", filename="F_lambda.png")
 
 
     # --- 6. Calculate Differences for Plotting ---
