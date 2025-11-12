@@ -138,7 +138,7 @@ def solve_by_lambda_approximation(T_sym: sp.Symbol, N: int, J: float, k: float, 
     return Z_approx
 
 
-def derive_thermo_properties(Z_sym: sp.Expr, T_sym: sp.Symbol, k: float) -> tuple[sp.Expr, sp.Expr]:
+def derive_thermo_properties(Z_sym: sp.Expr, T_sym: sp.Symbol, k: float) -> tuple[sp.Expr, sp.Expr, sp.Expr]:
     """
     Derives symbolic expressions for Energy (E) and Specific Heat (Cv)
     from a given partition function Z(T). (This function is unchanged)
@@ -153,24 +153,27 @@ def derive_thermo_properties(Z_sym: sp.Expr, T_sym: sp.Symbol, k: float) -> tupl
     """
     print("  Deriving symbolic E(T) and Cv(T)...")
     
+    # Free Energy: F = -kT * ln(Z)
+    F_sym = -k * T_sym * sp.ln(Z_sym)
+    
     # Average Energy: E = kT^2 * (d(ln(Z))/dT)
     E_sym = k * T_sym**2 * (Z_sym.diff(T_sym) / Z_sym)
     
     # Specific Heat: Cv = dE / dT
     Cv_sym = E_sym.diff(T_sym)
     
-    return E_sym, Cv_sym
+    return F_sym, E_sym, Cv_sym
 
-def plot_properties(Z_brute: sp.Expr, Z_transfer: sp.Expr, Z_lambda: sp.Expr,
+def plot_properties(F_brute: sp.Expr, F_transfer: sp.Expr, F_lambda: sp.Expr,
                     diff_abs_sym: sp.Expr, diff_rel_sym: sp.Expr,
                     T_sym: sp.Symbol, title: str):
     """
     Plots the given symbolic Z(T) functions and the approximation error.
     
     Args:
-        Z_brute (sp.Expr): Symbolic Partition Function (Brute Force).
-        Z_transfer (sp.Expr): Symbolic Partition Function (Transfer Matrix).
-        Z_lambda (sp.Expr): Symbolic Partition Function (Lambda Approx).
+        F_brute (sp.Expr): Symbolic Partition Function (Brute Force).
+        F_transfer (sp.Expr): Symbolic Partition Function (Transfer Matrix).
+        F_lambda (sp.Expr): Symbolic Partition Function (Lambda Approx).
         diff_abs_sym (sp.Expr): Symbolic absolute difference (Brute - Lambda).
         diff_rel_sym (sp.Expr): Symbolic relative difference (Brute - Lambda) / Brute.
         T_sym (sp.Symbol): The symbolic variable T.
@@ -178,36 +181,36 @@ def plot_properties(Z_brute: sp.Expr, Z_transfer: sp.Expr, Z_lambda: sp.Expr,
     """
     print("  Generating numerical functions for plotting...")
     # Use lambdify to convert symbolic expressions to fast numpy functions
-    Z_brute_func = sp.lambdify(T_sym, Z_brute, 'numpy')
-    Z_transfer_func = sp.lambdify(T_sym, Z_transfer, 'numpy')
-    Z_lambda_func = sp.lambdify(T_sym, Z_lambda, 'numpy')
-    diff_abs_func = sp.lambdify(T_sym, diff_abs_sym, 'numpy')
+    F_brute_func = sp.lambdify(T_sym, F_brute, 'numpy')
+    F_transfer_func = sp.lambdify(T_sym, F_transfer, 'numpy')
+    F_lambda_func = sp.lambdify(T_sym, F_lambda, 'numpy')
+
     diff_rel_func = sp.lambdify(T_sym, diff_rel_sym, 'numpy')
 
     print("  Generating plot...")
     # Create a range of numerical T values
-    T_values = np.linspace(0.1, 4, 1000) # Start from 0.1, not 0
+    T_values = np.linspace(0.1, 5, 1000) # Start from 0.1, not 0
 
-    # Calculate the properties at Z_brute_func T values
-    Z_brute_plot = Z_brute_func(T_values)
-    Z_transfer_plot = Z_transfer_func(T_values)
-    Z_lambda_plot = Z_lambda_func(T_values)
-    diff_abs_plot = diff_abs_func(T_values)
+    # Calculate the properties at F_brute_func T values
+    F_brute_plot = F_brute_func(T_values)
+    F_transfer_plot = F_transfer_func(T_values)
+    F_lambda_plot = F_lambda_func(T_values)
+
     diff_rel_plot = diff_rel_func(T_values)
 
     # --- Figure 1: Z Comparison ---
     fig1, (ax1) = plt.subplots(1, 1, figsize=(10, 8))
 
     # Plot partition function - Brute Force
-    ax1.plot(T_values, Z_transfer_plot, label='Z(T) Transfer (Exact)', color='blue')
-    ax1.plot(T_values, Z_brute_plot, label='Z(T) Brute Force (Exact)', color='yellow', linestyle='--')
+    ax1.plot(T_values, F_transfer_plot, label='F(T) Transfer (Exact)', color='blue')
+    ax1.plot(T_values, F_brute_plot, label='F(T) Brute Force (Exact)', color='yellow', linestyle='--')
     
     # Plot partition function - Lambda Approximation
-    ax1.plot(T_values, Z_lambda_plot, label='Z(T) Approx. ($\lambda_1^N$)', color='red', linestyle=':') # <-- FIX: Corrected label
+    ax1.plot(T_values, F_lambda_plot, label='F(T) Approx. ($\lambda_1^N$)', color='red', linestyle=':') # <-- FIX: Corrected label
     
-    ax1.set_ylabel('Z (log scale)', fontsize=20)
-    ax1.set_yscale('log') # Z grows very fast, log scale is better
-    ax1.set_title(title)
+    ax1.set_ylabel('F', fontsize=20)
+    # ax1.set_yscale('log') # Z grows very fast, log scale is better
+    ax1.set_title(title, fontsize=20)
     ax1.grid(True)
     ax1.legend()
     
@@ -216,18 +219,12 @@ def plot_properties(Z_brute: sp.Expr, Z_transfer: sp.Expr, Z_lambda: sp.Expr,
     
     # --- Figure 2: Approximation Error (Brute vs Lambda) ---
     fig2, (ax2) = plt.subplots(1, 1, figsize=(10, 10), sharex=True)
-    fig2.suptitle("Approximation Error (Brute vs. Lambda Approx.)")
-    
-    # # Plot Absolute Difference
-    # ax2.plot(T_values, diff_abs_plot, label='Z_brute - Z_lambda', color='purple')
-    # ax2.set_ylabel('Absolute Difference')
-    # ax2.grid(True)
-    # ax2.legend()
+    fig2.suptitle("Approximation Error (Brute vs. Lambda Approx.)", fontsize=20)
     
     # Plot Relative Difference
-    ax2.plot(T_values, diff_rel_plot, label='(Z_brute - Z_lambda) / Z_brute', color='orange')
-    ax2.set_ylabel('Relative Difference (Error)')
-    ax2.set_xlabel('Temperature (T)')
+    ax2.plot(T_values, diff_rel_plot, label='(F_brute - F_lambda) / F_brute', color='orange')
+    ax2.set_ylabel('Relative Difference (Error)', fontsize=20)
+    ax2.set_xlabel('Temperature [J/K]', fontsize=20)
     ax2.grid(True)
     ax2.legend()
     
@@ -246,6 +243,7 @@ if __name__ == "__main__":
     
     print(f"--- 1D Ising Model Comparison (N={N}, J={J}, k={k}, B={B}) ---")
     
+
     # --- 2. Run Method A: Brute Force ---
     print("\n[Method A: Brute Force Enumeration]")
     Z_brute = solve_by_brute_force(T, N, J, k, B)
@@ -258,12 +256,14 @@ if __name__ == "__main__":
     sp.pprint(Z_brute_simplified)
     # sp.preview(Z_brute_simplified)
 
+
     # --- 3. Run Method B: Transfer Matrix ---
     print("\n[Method B: Transfer Matrix (Exact)]")
     Z_transfer = solve_by_transfer_matrix(T, N, J, k, B)
     print("Symbolic Z(T) (Transfer Matrix):")
     sp.pprint(Z_transfer)
     # sp.preview(Z_transfer)
+
 
     # --- 4. Run Method C: Lambda Approximation ---
     print("\n[Method C: Lambda Approximation (N -> inf)]")
@@ -296,37 +296,48 @@ if __name__ == "__main__":
         difference = sp.simplify(Z_transfer.expand() - Z_brute_simplified)
         
         if difference == 0:
-            print(f"SUCCESS: Both methods yield the exact same symbolic function.")
+            print("SUCCESS: Both methods yield the exact same symbolic function.")
         else:
-            print(f"FAILURE: Methods differ symbolically by: {difference}")
-            # exit() # Don't exit, let's plot anyway
-    except Exception as e:
-        print(f"Symbolic simplification failed or was too slow: {e}")
-        print("Falling back to numerical check...")
+            print(f"WARNING: Methods differ symbolically by: {difference}")
+
         if np.allclose(numeric_diff, 0):
-             print(f"SUCCESS: Both methods are numerically identical at test points.")
+             print("SUCCESS: Both methods are numerically identical at test points.")
         else:
-            print(f"FAILURE: Methods differ numerically: {numeric_diff}")
-            # exit()
+            print(f"WARNING: Methods differ numerically: {numeric_diff}")
+
+    except Exception as e:
+        print(f"WARNING: Symbolic simplification failed or was too slow: {e}")
+
+
+    # --- 5. Derive Thermodynamic Properties ---
+    print("\n[Deriving Thermodynamic Properties]")
+
+    F_brute, _, _ = derive_thermo_properties(Z_brute_simplified, T, k)
+    sp.preview(F_brute)
+    F_transfer, _ ,_ = derive_thermo_properties(Z_transfer, T, k)
+    sp.preview(F_transfer)
+    F_lambda, _ ,_ = derive_thermo_properties(Z_lambda, T, k)
+    sp.preview(F_lambda)
 
 
     # --- 6. Calculate Differences for Plotting ---
     print("\n[Calculating Differences vs Approximation]")
-    # Z_brute_simplified is the exact "brute" result
-    # Z_lambda is the approximation
-    diff_abs_sym = Z_brute_simplified - Z_lambda
-    diff_rel_sym = (Z_brute_simplified - Z_lambda) / Z_brute_simplified
+    # F_brute is the exact "brute" result
+    # F_lambda is the approximation
+    diff_abs_sym = F_brute - F_lambda
+    diff_rel_sym = (F_brute - F_lambda) / F_brute
+
 
     # --- 7. Derive Properties and Plot ---
-    print("\n[Derivation and Plotting]")
+    print("\n[Plotting]")
     
-    plot_title = f"1D Ising Model (N={N}, J={J}, B={B}, k={k}) - Z(T) Comparison"
+    plot_title = f"1D Ising Model (N={N}, J={J}, B={B}, k={k}) - F(T) Comparison"
     plot_properties(
-        Z_brute_simplified, # <-- Pass Z_brute to the plot function
-        Z_transfer,         # <-- Pass Z_transfer to the plot function
-        Z_lambda,           # <-- Pass Z_lambda to the plot function
-        diff_abs_sym,       # <-- NEW
-        diff_rel_sym,       # <-- NEW
+        F_brute,
+        F_transfer,
+        F_lambda,
+        diff_abs_sym,
+        diff_rel_sym,
         T, 
         title=plot_title
     )
