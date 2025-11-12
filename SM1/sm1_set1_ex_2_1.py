@@ -101,6 +101,43 @@ def solve_by_transfer_matrix(T_sym: sp.Symbol, N: int, J: float, k: float, B: fl
     
     return Z_transfer
 
+def solve_by_lambda_approximation(T_sym: sp.Symbol, N: int, J: float, k: float, B: float) -> sp.Expr:
+    """
+    Calculates the symbolic partition function Z(T) using the
+    closed-form Transfer Matrix eigenvalues for B != 0.
+    
+    Args:
+        T_sym (sp.Symbol): The symbolic variable for Temperature.
+        N (int): Number of particles.
+        J (float): Coupling constant.
+        k (float): Boltzmann constant.
+        B (float): The external magnetic field.
+        
+    Returns:
+        sp.Expr: The symbolic partition function Z(T).
+    """
+    print("  Calculating eigenvalues for B != 0...")
+    
+    # --- This is the new, more general eigenvalue calculation ---
+    # The B=0 case (cosh, sinh) was a simplification of this.
+    
+    # Helper variables for clarity
+    J_T = J / (k * T_sym)
+    B_T = B / (k * T_sym)
+    
+    # The two eigenvalues of the 2x2 transfer matrix are:
+    term1 = sp.exp(J_T) * sp.cosh(B_T)
+    term2_inside_sqrt = sp.exp(2 * J_T) * sp.sinh(B_T)**2 + sp.exp(-2 * J_T)
+    term2 = sp.sqrt(term2_inside_sqrt)
+    
+    lambda_1 = term1 + term2
+    
+    # The partition function is still the sum of eigenvalues to the Nth power
+    Z_transfer = lambda_1**N
+    
+    return Z_transfer
+
+
 def derive_thermo_properties(Z_sym: sp.Expr, T_sym: sp.Symbol, k: float) -> tuple[sp.Expr, sp.Expr]:
     """
     Derives symbolic expressions for Energy (E) and Specific Heat (Cv)
@@ -124,7 +161,7 @@ def derive_thermo_properties(Z_sym: sp.Expr, T_sym: sp.Symbol, k: float) -> tupl
     
     return E_sym, Cv_sym
 
-def plot_properties(Z_sym: sp.Expr, E_sym: sp.Expr, Cv_sym: sp.Expr, T_sym: sp.Symbol, title: str):
+def plot_properties(Z_brute: sp.Expr, Z_transfer: sp.Expr, Z_lambda: sp.Expr, T_sym: sp.Symbol, title: str):
     """
     Plots the given symbolic Z(T), E(T), and Cv(T) functions.
     
@@ -137,39 +174,45 @@ def plot_properties(Z_sym: sp.Expr, E_sym: sp.Expr, Cv_sym: sp.Expr, T_sym: sp.S
     """
     print("  Generating numerical functions for plotting...")
     # Use lambdify to convert symbolic expressions to fast numpy functions
-    Z_func = sp.lambdify(T_sym, Z_sym, 'numpy')
-    E_func = sp.lambdify(T_sym, E_sym, 'numpy')
-    Cv_func = sp.lambdify(T_sym, Cv_sym, 'numpy')
+    Z_brute_func = sp.lambdify(T_sym, Z_brute, 'numpy')
+    Z_transfer_func = sp.lambdify(T_sym, Z_transfer, 'numpy')
+    Z_lambda_func = sp.lambdify(T_sym, Z_lambda, 'numpy')
 
     print("  Generating plot...")
     # Create a range of numerical T values
     T_values = np.linspace(0.1, 5.0, 200) # Start from 0.1, not 0
 
-    # Calculate the properties at those T values
-    Z_plot = Z_func(T_values)
-    E_plot = E_func(T_values)
-    Cv_plot = Cv_func(T_values)
+    # Calculate the properties at Z_brute_func T values
+    Z_brute_plot = Z_brute_func(T_values)
+    Z_transfer_plot = Z_transfer_func(T_values)
+    Z_lambda_plot = Z_lambda_func(T_values)
 
     # Create the plots (3 rows, 1 column)
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 12), sharex=True)
+    _, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 12), sharex=True)
 
-    # Plot Partition Function
-    ax1.plot(T_values, Z_plot, label='Partition Function Z(T)', color='green')
+    # Plot partition function - Brute Force
+    ax1.plot(T_values, Z_brute_plot, label='Partition Function Z(T) brute', color='green')
     ax1.set_ylabel('Z (log scale)')
     ax1.set_yscale('log') # Z grows very fast, log scale is better
     ax1.set_title(title)
     ax1.grid(True)
 
-    # Plot Average Energy
-    ax2.plot(T_values, E_plot, label='Average Energy E(T)', color='blue')
-    ax2.set_ylabel('Energy E')
+    # Plot partition function - Transfer Matrix
+    ax2.plot(T_values, Z_transfer_plot, label='Partition Function Z(T) transfer', color='blue')
+    ax2.set_ylabel('Z (log scale)')
+    ax2.set_yscale('log') # Z grows very fast, log scale is better
     ax2.grid(True)
 
-    # Plot Specific Heat
-    ax3.plot(T_values, Cv_plot, label='Specific Heat $C_v(T)$', color='red')
-    ax3.set_xlabel('Temperature (T)')
-    ax3.set_ylabel('Specific Heat $C_v$')
-    
+    # Plot partition function - Lambda Approximation
+    ax3.plot(T_values, Z_lambda_plot, label='Partition Function Z(T) transfer', color='blue')
+    ax3.set_ylabel('Z (log scale)')
+    ax3.set_yscale('log') # Z grows very fast, log scale is better
+    ax3.grid(True)
+
+    plt.show()
+
+
+if __name__ == "__main__":
     # --- 1. Setup ---
     N = 6
     J = 1
@@ -179,29 +222,38 @@ def plot_properties(Z_sym: sp.Expr, E_sym: sp.Expr, Cv_sym: sp.Expr, T_sym: sp.S
     
     print(f"--- 1D Ising Model Comparison (N={N}, J={J}, k={k}, B={B}) ---")
     
-    # --- 2. Run Method A: Transfer Matrix ---
-    print("\n[Method A: Transfer Matrix]")
-    Z_transfer = solve_by_transfer_matrix(T, N, J, k, B)
-    print("Symbolic Z(T) (Transfer Matrix):")
-    sp.pprint(Z_transfer)
-    
-    # --- 3. Run Method B: Brute Force ---
-    print("\n[Method B: Brute Force Enumeration]")
+    # --- 3. Run Method A: Brute Force ---
+    print("\n[Method A: Brute Force Enumeration]")
     Z_brute = solve_by_brute_force(T, N, J, k, B)
-    
+
     # Simplify the brute force result
     print("  Simplifying brute force result...")
     Z_brute_simplified = sp.simplify(Z_brute)
     
     print("Symbolic Z(T) (Brute Force, Simplified):")
     sp.pprint(Z_brute_simplified)
+    sp.preview(Z_brute_simplified)
+
+    # --- 2. Run Method B: Transfer Matrix ---
+    print("\n[Method B: Transfer Matrix]")
+    Z_transfer = solve_by_transfer_matrix(T, N, J, k, B)
+    print("Symbolic Z(T) (Transfer Matrix):")
+    sp.pprint(Z_transfer)
+    sp.preview(Z_transfer)
+
+    # --- 3. Run Method C: Lambda Approximation ---
+    print("\n[Method C: Lambda Approximation]")
+    Z_lambda = solve_by_lambda_approximation(T, N, J, k, B)
+    print("Symbolic Z(T) (Lambda Approximation):")
+    sp.pprint(Z_lambda)
+    sp.preview(Z_lambda) 
     
     # --- 4. Compare the Two Methods ---
     print("\n[Comparison]")
     # We must .expand() the transfer matrix form to compare it
     # to the simplified sum-of-exponentials form.
     print("  Simplifying (Z_transfer.expand() - Z_brute_simplified)...")
-    
+
     # Note: This simplification can be very slow with B!=0
     # We can test equality in a faster way
     
@@ -239,15 +291,12 @@ def plot_properties(Z_sym: sp.Expr, E_sym: sp.Expr, Cv_sym: sp.Expr, T_sym: sp.S
 
     # --- 5. Derive Properties and Plot ---
     print("\n[Derivation and Plotting]")
-    # Since they are identical, we can use either one.
-    # Z_transfer is cleaner to work with.
-    E_sym, Cv_sym = derive_thermo_properties(Z_transfer, T, k)
     
-    plot_title = f"1D Ising Model (N={N}, J={J}, B={B}) - Methods Verified"
+    plot_title = f"1D Ising Model (N={N}, J={J}, B={B}) - Multiple Methods Comparison"
     plot_properties(
+        Z_brute_simplified, # <-- Pass Z_sym to the plot function
         Z_transfer, # <-- Pass Z_sym to the plot function
-        E_sym, 
-        Cv_sym, 
+        Z_lambda,
         T, 
         title=plot_title
     )
