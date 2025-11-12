@@ -148,7 +148,7 @@ def plot_properties(E_sym: sp.Expr, Cv_sym: sp.Expr, T_sym: sp.Symbol, title: st
     Cv_plot = Cv_func(T_values)
 
     # Create the plots
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+    _, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
     # Plot Average Energy
     ax1.plot(T_values, E_plot, label='Average Energy E(T)', color='blue')
@@ -172,7 +172,7 @@ if __name__ == "__main__":
     N = 6
     J = 1
     k = 1
-    B = 1  # <-- NEW: Set magnetic field
+    B = 0  # <-- NEW: Set magnetic field
     T = sp.symbols('T') # Our main symbolic variable
     
     print(f"--- 1D Ising Model Comparison (N={N}, J={J}, k={k}, B={B}) ---")
