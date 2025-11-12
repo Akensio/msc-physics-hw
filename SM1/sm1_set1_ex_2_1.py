@@ -206,7 +206,7 @@ def plot_properties(F_brute: sp.Expr, F_transfer: sp.Expr, F_lambda: sp.Expr,
     ax1.plot(T_values, F_brute_plot, label='F(T) Brute Force (Exact)', color='yellow', linestyle='--')
     
     # Plot partition function - Lambda Approximation
-    ax1.plot(T_values, F_lambda_plot, label='F(T) Approx. ($\lambda_1^N$)', color='red', linestyle=':') # <-- FIX: Corrected label
+    ax1.plot(T_values, F_lambda_plot, label='F(T) Approx. ($\lambda_1^N$)', color='red', linestyle=':')
     
     ax1.set_ylabel('F', fontsize=20)
     # ax1.set_yscale('log') # Z grows very fast, log scale is better
@@ -219,7 +219,7 @@ def plot_properties(F_brute: sp.Expr, F_transfer: sp.Expr, F_lambda: sp.Expr,
     
     # --- Figure 2: Approximation Error (Brute vs Lambda) ---
     fig2, (ax2) = plt.subplots(1, 1, figsize=(10, 10), sharex=True)
-    fig2.suptitle("Approximation Error (Brute vs. Lambda Approx.)", fontsize=20)
+    fig2.suptitle(f"Approximation Error (Brute vs. Lambda Approx. N=${N})", fontsize=20)
     
     # Plot Relative Difference
     ax2.plot(T_values, diff_rel_plot, label='(F_brute - F_lambda) / F_brute', color='orange')
@@ -238,8 +238,8 @@ if __name__ == "__main__":
     N = 12
     J = 1
     k = 1
-    B = 0  # <-- Set magnetic field (try 0, 0.5, 1.0)
-    T = sp.symbols('T') # Our main symbolic variable
+    B = 0
+    T = sp.symbols('T')
     
     print(f"--- 1D Ising Model Comparison (N={N}, J={J}, k={k}, B={B}) ---")
     
@@ -254,7 +254,6 @@ if __name__ == "__main__":
     
     print("Symbolic Z(T) (Brute Force, Simplified):")
     sp.pprint(Z_brute_simplified)
-    # sp.preview(Z_brute_simplified)
 
 
     # --- 3. Run Method B: Transfer Matrix ---
@@ -262,7 +261,6 @@ if __name__ == "__main__":
     Z_transfer = solve_by_transfer_matrix(T, N, J, k, B)
     print("Symbolic Z(T) (Transfer Matrix):")
     sp.pprint(Z_transfer)
-    # sp.preview(Z_transfer)
 
 
     # --- 4. Run Method C: Lambda Approximation ---
@@ -270,7 +268,7 @@ if __name__ == "__main__":
     Z_lambda = solve_by_lambda_approximation(T, N, J, k, B)
     print("Symbolic Z(T) (Lambda Approximation):")
     sp.pprint(Z_lambda)
-    # sp.preview(Z_lambda) 
+
     
     # --- 5. Compare the Two Exact Methods ---
     print("\n[Comparison: Brute vs Transfer]")
@@ -313,11 +311,14 @@ if __name__ == "__main__":
     print("\n[Deriving Thermodynamic Properties]")
 
     F_brute, _, _ = derive_thermo_properties(Z_brute_simplified, T, k)
-    sp.preview(F_brute)
     F_transfer, _ ,_ = derive_thermo_properties(Z_transfer, T, k)
-    sp.preview(F_transfer)
     F_lambda, _ ,_ = derive_thermo_properties(Z_lambda, T, k)
-    sp.preview(F_lambda)
+    # sp.preview(Z_brute_simplified, filename="Z_brute_simplified.png")
+    # sp.preview(F_brute, filename="F_brute.png")
+    # sp.preview(Z_transfer, filename="Z_transfer.png")
+    # sp.preview(F_transfer, filename="F_transfer.png")
+    # sp.preview(Z_lambda, filename="Z_lambda.png")
+    # sp.preview(F_lambda, filename="F_lambda.png")
 
 
     # --- 6. Calculate Differences for Plotting ---
