@@ -188,7 +188,7 @@ def plot_properties(Z_brute: sp.Expr, Z_transfer: sp.Expr, Z_lambda: sp.Expr, T_
     Z_lambda_plot = Z_lambda_func(T_values)
 
     # Create the plots (3 rows, 1 column)
-    _, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 12), sharex=True)
+    _, (ax1) = plt.subplots(1, 1, figsize=(10, 12), sharex=True)
 
     # Plot partition function - Brute Force
     ax1.plot(T_values, Z_brute_plot, label='Partition Function Z(T) brute', color='green')
@@ -198,16 +198,16 @@ def plot_properties(Z_brute: sp.Expr, Z_transfer: sp.Expr, Z_lambda: sp.Expr, T_
     ax1.grid(True)
 
     # Plot partition function - Transfer Matrix
-    ax2.plot(T_values, Z_transfer_plot, label='Partition Function Z(T) transfer', color='blue')
-    ax2.set_ylabel('Z (log scale)')
-    ax2.set_yscale('log') # Z grows very fast, log scale is better
-    ax2.grid(True)
+    ax1.plot(T_values, Z_transfer_plot, label='Partition Function Z(T) transfer', color='blue')
+    # ax2.set_ylabel('Z (log scale)')
+    # ax2.set_yscale('log') # Z grows very fast, log scale is better
+    # ax2.grid(True)
 
     # Plot partition function - Lambda Approximation
-    ax3.plot(T_values, Z_lambda_plot, label='Partition Function Z(T) transfer', color='blue')
-    ax3.set_ylabel('Z (log scale)')
-    ax3.set_yscale('log') # Z grows very fast, log scale is better
-    ax3.grid(True)
+    ax1.plot(T_values, Z_lambda_plot, label='Partition Function Z(T) transfer', color='red')
+    # ax3.set_ylabel('Z (log scale)')
+    # ax3.set_yscale('log') # Z grows very fast, log scale is better
+    # ax3.grid(True)
 
     plt.show()
 
