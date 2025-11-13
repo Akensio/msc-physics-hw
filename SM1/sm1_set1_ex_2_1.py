@@ -242,18 +242,7 @@ if __name__ == "__main__":
     T = sp.symbols('T')
     
     print(f"--- 1D Ising Model Comparison (N={N}, J={J}, k={k}, B={B}) ---")
-    
 
-    # --- 2. Run Method A: Brute Force ---
-    print("\n[Method A: Brute Force Enumeration]")
-    Z_brute = solve_by_brute_force(T, N, J, k, B)
-
-    # Simplify the brute force result
-    print("  Simplifying brute force result...")
-    Z_brute_simplified = sp.simplify(Z_brute)
-    
-    print("Symbolic Z(T) (Brute Force, Simplified):")
-    sp.pprint(Z_brute_simplified)
 
 
     # --- 3. Run Method B: Transfer Matrix ---
@@ -268,6 +257,18 @@ if __name__ == "__main__":
     Z_lambda = solve_by_lambda_approximation(T, N, J, k, B)
     print("Symbolic Z(T) (Lambda Approximation):")
     sp.pprint(Z_lambda)
+
+
+    # --- 2. Run Method A: Brute Force ---
+    print("\n[Method A: Brute Force Enumeration]")
+    Z_brute = solve_by_brute_force(T, N, J, k, B)
+
+    # Simplify the brute force result
+    print("  Simplifying brute force result...")
+    Z_brute_simplified = sp.simplify(Z_brute)
+    
+    print("Symbolic Z(T) (Brute Force, Simplified):")
+    sp.pprint(Z_brute_simplified)
 
     
     # --- 5. Compare the Two Exact Methods ---
