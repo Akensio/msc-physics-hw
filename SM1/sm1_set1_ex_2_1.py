@@ -186,6 +186,7 @@ def plot_properties(F_brute: sp.Expr, F_transfer: sp.Expr, F_lambda: sp.Expr,
     F_lambda_func = sp.lambdify(T_sym, F_lambda, 'numpy')
 
     diff_rel_func = sp.lambdify(T_sym, diff_rel_sym, 'numpy')
+    diff_abs_func = sp.lambdify(T_sym, diff_abs_sym, 'numpy')
 
     print("  Generating plot...")
     # Create a range of numerical T values
@@ -197,6 +198,7 @@ def plot_properties(F_brute: sp.Expr, F_transfer: sp.Expr, F_lambda: sp.Expr,
     F_lambda_plot = F_lambda_func(T_values)
 
     diff_rel_plot = diff_rel_func(T_values)
+    diff_abs_plot = diff_abs_func(T_values)
 
     # --- Figure 1: Z Comparison ---
     fig1, (ax1) = plt.subplots(1, 1, figsize=(10, 8))
@@ -218,7 +220,7 @@ def plot_properties(F_brute: sp.Expr, F_transfer: sp.Expr, F_lambda: sp.Expr,
     fig1.tight_layout()
     
     # --- Figure 2: Approximation Error (Brute vs Lambda) ---
-    fig2, (ax2) = plt.subplots(1, 1, figsize=(10, 10), sharex=True)
+    fig2, (ax2, ax3) = plt.subplots(2, 1, figsize=(10, 10), sharex=True)
     fig2.suptitle(f"Approximation Error (Brute vs. Lambda Approx. N={N})", fontsize=20)
     
     # Plot Relative Difference
@@ -227,6 +229,12 @@ def plot_properties(F_brute: sp.Expr, F_transfer: sp.Expr, F_lambda: sp.Expr,
     ax2.set_xlabel('Temperature [J/K]', fontsize=20)
     ax2.grid(True)
     ax2.legend()
+
+    ax3.plot(T_values, diff_abs_plot, label='(F_brute - F_lambda)', color='orange')
+    ax3.set_ylabel('Difference', fontsize=20)
+    ax3.set_xlabel('Temperature [J/K]', fontsize=20)
+    ax3.grid(True)
+    ax3.legend()
     
     fig2.tight_layout(rect=[0, 0.03, 1, 0.96]) # Adjust layout for suptitle
 
@@ -266,7 +274,7 @@ if __name__ == "__main__":
 
     # Simplify the brute force result
     print("  Simplifying brute force result...")
-    Z_brute_simplified = sp.simplify(Z_brute)
+    # Z_brute_simplified = sp.simplify(Z_brute)
     Z_brute_simplified = Z_transfer
     
     print("Symbolic Z(T) (Brute Force, Simplified):")
@@ -329,8 +337,8 @@ if __name__ == "__main__":
     print("\n[Calculating Differences vs Approximation]")
     # F_brute is the exact "brute" result
     # F_lambda is the approximation
-    diff_abs_sym = F_brute - F_lambda
-    diff_rel_sym = (F_brute - F_lambda) / F_brute
+    diff_abs_sym = F_transfer - F_lambda
+    diff_rel_sym = (F_transfer - F_lambda) / F_brute
 
 
     # --- 7. Derive Properties and Plot ---

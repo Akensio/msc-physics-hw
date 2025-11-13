@@ -87,13 +87,27 @@ for vec_j in basis_vectors:
         result = calculate_symbolic_dot_product(vec_j, vec_j_plus_1)
         # Format the output for clarity. Using \t for tab alignment.
         rows[-1].append(result)
-    print("-" * 60)  # Add a separator for each vec_j
 
 sympy.init_printing()
 
 transfer_matrix = sympy.Matrix(rows)
 # sympy.preview(transfer_matrix)
 
+
+
+# ==============================
+# === STUFF FOR EXERCISE 2.2 ===
+# ==============================
+A_MATRIX = sympy.Matrix([
+    [1,0,0,0],
+    [0,1,0,0],
+    [0,0,-1,0],
+    [0,0,0,-1]
+])
+
+# ----------
+# -- J=-1 --
+# ----------
 transfer_matrix_2_2_J_negative_1: sympy.Matrix = transfer_matrix.copy().subs({J_1: -1, J_2: -1, B: 0})
 # sympy.preview(transfer_matrix_2_2_J_negative_1)
 print("\n\nLaTeX format of the transfer matrix for J=-1:")
@@ -103,6 +117,28 @@ eigenvals_2_2_J_negative_1 = transfer_matrix_2_2_J_negative_1.eigenvals()
 # print(sympy.simplify(eigenvals_2_2_J_negative_1))
 print(sympy.latex(eigenvals_2_2_J_negative_1))
 
+
+PP_J_neg_1, DD_J_neg_1 = transfer_matrix_2_2_J_negative_1.diagonalize()
+PP_J_neg_1_inv = PP_J_neg_1.inv()
+print("\nDiagonalization (J=-1):")
+print(sympy.latex(PP_J_neg_1))
+print("\nDiagonal Matrix (J=-1):")
+print(sympy.latex(DD_J_neg_1))
+print("\nVerification (J=-1):")
+
+print(
+    sympy.latex(
+        sympy.simplify(
+            PP_J_neg_1_inv * transfer_matrix_2_2_J_negative_1 * PP_J_neg_1
+        )
+    )
+)
+print("\nB Matrix (J=-1):")
+print(sympy.latex(PP_J_neg_1_inv * A_MATRIX * PP_J_neg_1))
+
+# ----------
+# -- J=+1 --
+# ----------
 transfer_matrix_2_2_J_plus_1: sympy.Matrix = transfer_matrix.copy().subs({J_1: 1, J_2: 1, B: 0})
 # sympy.preview(transfer_matrix_2_2_J_plus_1)
 print("\n\nLaTeX format of the transfer matrix for J=+1:")
@@ -111,3 +147,22 @@ print("\nEigenvalues (J=+1):")
 eigenvals_2_2_J_plus_1 = transfer_matrix_2_2_J_plus_1.eigenvals()
 # print(sympy.simplify(eigenvals_2_2_J_plus_1))
 print(sympy.latex(sympy.simplify(eigenvals_2_2_J_plus_1)))
+
+PP_J_pos_1, DD_J_neg_1 = transfer_matrix_2_2_J_plus_1.diagonalize()
+PP_J_pos_1_inv = PP_J_pos_1.inv()
+print("\nDiagonalization (J=-1):")
+print(sympy.latex(PP_J_pos_1))
+print("\nDiagonal Matrix (J=-1):")
+print(sympy.latex(DD_J_neg_1))
+print("\nVerification (J=-1):")
+
+print(
+    sympy.latex(
+        sympy.simplify(
+            PP_J_pos_1_inv * transfer_matrix_2_2_J_plus_1 * PP_J_pos_1
+        )
+    )
+)
+print("\nB Matrix (J=-1):")
+print(sympy.latex(PP_J_pos_1_inv * A_MATRIX * PP_J_pos_1))
+
