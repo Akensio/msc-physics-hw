@@ -210,29 +210,29 @@ def plot_properties(F_brute: sp.Expr, F_transfer: sp.Expr, F_lambda: sp.Expr,
     # Plot partition function - Lambda Approximation
     ax1.plot(T_values, F_lambda_plot, label='F(T) Approx. ($\\lambda_1^N$)', color='red', linestyle=':')
     
-    ax1.set_ylabel('Free Energy [J]', fontsize=20)
+    ax1.set_ylabel('Free Energy', fontsize=20)
     # ax1.set_yscale('log') # Z grows very fast, log scale is better
     ax1.set_title(title, fontsize=20)
     ax1.grid(True)
     ax1.legend()
     
-    ax1.set_xlabel('Temperature [J/k]', fontsize=20) # Moved from bottom
+    ax1.set_xlabel('Temperature', fontsize=20) # Moved from bottom
     fig1.tight_layout()
     
     # --- Figure 2: Approximation Error (Brute vs Lambda) ---
-    fig2, (ax2, ax3) = plt.subplots(2, 1, figsize=(10, 10), sharex=True)
+    fig2, (ax3, ax2) = plt.subplots(2, 1, figsize=(10, 10), sharex=True)
     fig2.suptitle(f"Approximation Error (Brute vs. Lambda Approx. N={N})", fontsize=20)
     
     # Plot Relative Difference
     ax2.plot(T_values, diff_rel_plot, label='(F_brute - F_lambda) / F_brute', color='orange')
     ax2.set_ylabel('Relative Difference', fontsize=20)
-    ax2.set_xlabel('Temperature [J/K]', fontsize=20)
+    ax2.set_xlabel('Temperature', fontsize=20)
     ax2.grid(True)
     ax2.legend()
 
     ax3.plot(T_values, diff_abs_plot, label='(F_brute - F_lambda)', color='orange')
     ax3.set_ylabel('Difference', fontsize=20)
-    ax3.set_xlabel('Temperature [J/K]', fontsize=20)
+    ax3.set_xlabel('Temperature', fontsize=20)
     ax3.grid(True)
     ax3.legend()
     
@@ -269,13 +269,13 @@ if __name__ == "__main__":
 
     # --- 2. Run Method A: Brute Force ---
     print("\n[Method A: Brute Force Enumeration]")
-    # Z_brute = solve_by_brute_force(T, N, J, k, B)
-    Z_brute = Z_transfer
+    Z_brute = solve_by_brute_force(T, N, J, k, B)
+    # Z_brute = Z_transfer
 
     # Simplify the brute force result
     print("  Simplifying brute force result...")
-    # Z_brute_simplified = sp.simplify(Z_brute)
-    Z_brute_simplified = Z_transfer
+    Z_brute_simplified = sp.simplify(Z_brute)
+    # Z_brute_simplified = Z_transfer
     
     print("Symbolic Z(T) (Brute Force, Simplified):")
     sp.pprint(Z_brute_simplified)
