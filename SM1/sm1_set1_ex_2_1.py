@@ -208,7 +208,7 @@ def plot_properties(F_brute: sp.Expr, F_transfer: sp.Expr, F_lambda: sp.Expr,
     # Plot partition function - Lambda Approximation
     ax1.plot(T_values, F_lambda_plot, label='F(T) Approx. ($\\lambda_1^N$)', color='red', linestyle=':')
     
-    ax1.set_ylabel('F', fontsize=20)
+    ax1.set_ylabel('Free Energy [J]', fontsize=20)
     # ax1.set_yscale('log') # Z grows very fast, log scale is better
     ax1.set_title(title, fontsize=20)
     ax1.grid(True)
@@ -219,11 +219,11 @@ def plot_properties(F_brute: sp.Expr, F_transfer: sp.Expr, F_lambda: sp.Expr,
     
     # --- Figure 2: Approximation Error (Brute vs Lambda) ---
     fig2, (ax2) = plt.subplots(1, 1, figsize=(10, 10), sharex=True)
-    fig2.suptitle(f"Approximation Error (Brute vs. Lambda Approx. N=${N})", fontsize=20)
+    fig2.suptitle(f"Approximation Error (Brute vs. Lambda Approx. N={N})", fontsize=20)
     
     # Plot Relative Difference
     ax2.plot(T_values, diff_rel_plot, label='(F_brute - F_lambda) / F_brute', color='orange')
-    ax2.set_ylabel('Relative Difference (Error)', fontsize=20)
+    ax2.set_ylabel('Relative Difference', fontsize=20)
     ax2.set_xlabel('Temperature [J/K]', fontsize=20)
     ax2.grid(True)
     ax2.legend()
