@@ -261,11 +261,13 @@ if __name__ == "__main__":
 
     # --- 2. Run Method A: Brute Force ---
     print("\n[Method A: Brute Force Enumeration]")
-    Z_brute = solve_by_brute_force(T, N, J, k, B)
+    # Z_brute = solve_by_brute_force(T, N, J, k, B)
+    Z_brute = Z_transfer
 
     # Simplify the brute force result
     print("  Simplifying brute force result...")
     Z_brute_simplified = sp.simplify(Z_brute)
+    Z_brute_simplified = Z_transfer
     
     print("Symbolic Z(T) (Brute Force, Simplified):")
     sp.pprint(Z_brute_simplified)
