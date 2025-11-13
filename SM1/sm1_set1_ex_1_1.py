@@ -86,7 +86,6 @@ for vec_j in basis_vectors:
     for vec_j_plus_1 in basis_vectors:
         result = calculate_symbolic_dot_product(vec_j, vec_j_plus_1)
         # Format the output for clarity. Using \t for tab alignment.
-        print(f"f_tilde({vec_j}, {vec_j_plus_1}) \t= {result}")
         rows[-1].append(result)
     print("-" * 60)  # Add a separator for each vec_j
 
