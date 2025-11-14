@@ -2,7 +2,7 @@ import sympy as sp
 from pathlib import Path
 
 # Make sure output directory exists
-OUT_DIR = Path(__file__).parent / "math"
+OUT_DIR = Path(__file__).parent / "out_2_2"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Symbols

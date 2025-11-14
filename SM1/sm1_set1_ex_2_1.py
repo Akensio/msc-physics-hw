@@ -1,6 +1,10 @@
 import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
+
+OUT_DIR = Path(__file__).parent / "out_2_1"
+OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 def calculate_state_energy(spins: list, J: float, B: float) -> float:
     """
@@ -252,7 +256,6 @@ if __name__ == "__main__":
     print(f"--- 1D Ising Model Comparison (N={N}, J={J}, k={k}, B={B}) ---")
 
 
-
     # --- 3. Run Method B: Transfer Matrix ---
     print("\n[Method B: Transfer Matrix (Exact)]")
     Z_transfer = solve_by_transfer_matrix(T, N, J, k, B)
@@ -324,13 +327,13 @@ if __name__ == "__main__":
     F_brute, _, _ = derive_thermo_properties(Z_brute_simplified, T, k)
     F_transfer, _ ,_ = derive_thermo_properties(Z_transfer, T, k)
     F_lambda, _ ,_ = derive_thermo_properties(Z_lambda, T, k)
-    sp.preview(Z_brute, viewer="file", filename="Z_brute.png")
-    sp.preview(Z_brute_simplified, viewer="file", filename="Z_brute_simplified.png")
-    sp.preview(F_brute, viewer="file", filename="F_brute.png")
-    sp.preview(Z_transfer, viewer="file", filename="Z_transfer.png")
-    sp.preview(F_transfer, viewer="file", filename="F_transfer.png")
-    sp.preview(Z_lambda, viewer="file", filename="Z_lambda.png")
-    sp.preview(F_lambda, viewer="file", filename="F_lambda.png")
+    sp.preview(Z_brute, viewer="file", filename=(OUT_DIR / "Z_brute.png").resolve())
+    sp.preview(Z_brute_simplified, viewer="file", filename=(OUT_DIR / "Z_brute_simplified.png").resolve())
+    sp.preview(F_brute, viewer="file", filename=(OUT_DIR / "F_brute.png").resolve())
+    sp.preview(Z_transfer, viewer="file", filename=(OUT_DIR / "Z_transfer.png").resolve())
+    sp.preview(F_transfer, viewer="file", filename=(OUT_DIR / "F_transfer.png").resolve())
+    sp.preview(Z_lambda, viewer="file", filename=(OUT_DIR / "Z_lambda.png").resolve())
+    sp.preview(F_lambda, viewer="file", filename=(OUT_DIR / "F_lambda.png").resolve())
 
 
     # --- 6. Calculate Differences for Plotting ---
