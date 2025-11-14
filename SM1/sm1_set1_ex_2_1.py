@@ -2,6 +2,7 @@ import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
+sp.init_printing()
 
 OUT_DIR = Path(__file__).parent / "out_2_1"
 OUT_DIR.mkdir(parents=True, exist_ok=True)

@@ -1,5 +1,6 @@
 import sympy
 from pathlib import Path
+sympy.init_printing()
 
 # Make sure output directory exists
 OUT_DIR = Path(__file__).parent / "out_1_1"
@@ -80,7 +81,6 @@ def calculate_symbolic_dot_product(vec_j, vec_j_plus_1):
 basis_vectors = [(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)]
 
 print("Calculating f_tilde for all 16 combinations (vec_j, vec_j_plus_1):")
-print("-" * 60)
 
 # Iterate over all combinations
 rows: list[list[sympy.Expr]] = []
@@ -91,7 +91,6 @@ for vec_j in basis_vectors:
         # Format the output for clarity. Using \t for tab alignment.
         rows[-1].append(result)
 
-sympy.init_printing()
-
 transfer_matrix = sympy.Matrix(rows)
 sympy.preview(transfer_matrix, viewer="file", filename=(OUT_DIR / "transfer_matrix.png").resolve())
+print(sympy.latex(transfer_matrix))
