@@ -1,13 +1,13 @@
-import sympy
+import sympy as sp
 from pathlib import Path
-sympy.init_printing()
+sp.init_printing()
 
 # Make sure output directory exists
 OUT_DIR = Path(__file__).parent / "out_1_1"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Define , J_1, J_2, and B as symbolic variables
-BETA, J_1, J_2, B = sympy.symbols("beta J_1 J_2 B")
+BETA, J_1, J_2, B = sp.symbols("beta J_1 J_2 B")
 
 # This mapping is from Image 1
 # (1,0,0,0) -> s_i=1, s_i+1=1
@@ -63,7 +63,7 @@ def calculate_symbolic_dot_product(vec_j, vec_j_plus_1):
     )
 
     # Sum them up and simplify
-    f_tilde = sympy.simplify(sympy.E ** (-BETA * (f_1 + f_2)))
+    f_tilde = sp.simplify(sp.E ** (-BETA * (f_1 + f_2)))
 
     return f_tilde
 
@@ -83,7 +83,7 @@ basis_vectors = [(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)]
 print("Calculating f_tilde for all 16 combinations (vec_j, vec_j_plus_1):")
 
 # Iterate over all combinations
-rows: list[list[sympy.Expr]] = []
+rows: list[list[sp.Expr]] = []
 for vec_j in basis_vectors:
     rows.append([])
     for vec_j_plus_1 in basis_vectors:
@@ -91,6 +91,18 @@ for vec_j in basis_vectors:
         # Format the output for clarity. Using \t for tab alignment.
         rows[-1].append(result)
 
-transfer_matrix = sympy.Matrix(rows)
-sympy.preview(transfer_matrix, viewer="file", filename=(OUT_DIR / "transfer_matrix.png").resolve())
-print(sympy.latex(transfer_matrix))
+transfer_matrix = sp.Matrix(rows)
+print("\nTransfer Matrix:")
+print(sp.latex(transfer_matrix))
+sp.preview(transfer_matrix, viewer="file", filename=(OUT_DIR / "transfer_matrix.png").resolve())
+
+# For exercise 2.2:
+print("\nEXERCISE 2.2: Transfer Matrix with J_1=1, J_2=1, B=0:")
+ex_2_2_J_pos_1 = transfer_matrix.subs({J_1: 1, J_2: 1, B: 0})
+print(sp.latex(sp.simplify(ex_2_2_J_pos_1)))
+sp.preview(ex_2_2_J_pos_1, viewer="file", filename=(OUT_DIR / "transfer_matrix_J_pos_1.png").resolve())
+
+print("\nEXERCISE 2.2: Transfer Matrix with J_1=-1, J_2=-1, B=0:")
+ex_2_2_J_neg_1 = transfer_matrix.subs({J_1: -1, J_2: -1, B: 0})
+print(sp.latex(sp.simplify(ex_2_2_J_neg_1)))
+sp.preview(ex_2_2_J_neg_1, viewer="file", filename=(OUT_DIR / "transfer_matrix_J_neg_1.png").resolve())
