@@ -16,7 +16,7 @@ def critical_condition(beta, b, a):
 b_max = a / (np.sqrt(2) + 1)
 
 # Generate b values within this range to solve for Tc
-b_values = np.linspace(0.00001, b_max - 0.00001, 1000)
+b_values = np.linspace(0.00001, b_max - 0.00001, 200)
 T_c_values = []
 
 for b in b_values:
@@ -37,7 +37,7 @@ T_plot = np.array([0] + T_c_values + [0])
 plt.figure(figsize=(6, 5))
 plt.title('1D Phase Diagram')
 plt.ylabel('$b/a$')
-plt.xlabel('$k_B T / a$')
+plt.xlabel('$T$')
 plt.ylim(-1.2, 1.2)
 plt.xlim(0, 2)
 
