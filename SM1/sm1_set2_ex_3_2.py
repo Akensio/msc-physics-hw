@@ -56,7 +56,7 @@ b_plot_neg = -b_plot
 
 plt.figure(figsize=(7, 6))
 plt.xticks([])
-plt.title('Corrected 2D Phase Diagram')
+plt.title('2D Phase Diagram')
 plt.ylabel('$b/a$')
 plt.xlabel('$T$')
 plt.ylim(-1.2, 1.2)
