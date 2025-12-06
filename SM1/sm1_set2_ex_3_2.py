@@ -47,35 +47,59 @@ for b in b_values:
     except ValueError:
         T_c_values.append(np.nan)
 
-# Prepare plot data
+# Prepare plot data for POSITIVE side
 b_plot = np.array([0] + list(b_values))
 T_plot = np.array([0] + T_c_values)
 
-plt.figure(figsize=(7, 5))
+# Prepare plot data for NEGATIVE side (Symmetry)
+b_plot_neg = -b_plot
+
+plt.figure(figsize=(7, 6))
 plt.xticks([])
 plt.title('Corrected 2D Phase Diagram')
 plt.ylabel('$b/a$')
 plt.xlabel('$T$')
 plt.ylim(-1.2, 1.2)
-plt.xlim(0, 10) # Limit x-axis to show the divergence clearly
+plt.xlim(0, 10) 
 
-# Asymptote and Stability Lines
-plt.axhline(y=b_crit, color='g', linestyle='--', label=r'Asymptote $b/a = \sqrt{2}-1$')
+# --- Asymptotes and Stability Lines ---
+# Positive Asymptote
+plt.axhline(y=b_crit, color='g', linestyle='--', label=r'Asymptotes $b/a = \pm(\sqrt{2}-1)$')
+# Negative Asymptote
+plt.axhline(y=-b_crit, color='g', linestyle='--')
+# Stability Limits
 plt.axhline(y=-1, color='k', linestyle='--', label='Stability Limit')
 plt.axhline(y=1, color='k', linestyle='--')
 
-# Plot the diverging curve
+# --- Plotting the Curves ---
+# Positive Curve (Ferro)
 plt.plot(T_plot, b_plot, 'r-', linewidth=2, label='Phase Boundary $T_c$')
+# Negative Curve (Antiferro) - Symmetric
+plt.plot(T_plot, b_plot_neg, 'r-', linewidth=2)
 
-# Fill the phases
-# Everything "above/left" of the curve is Ordered
+# --- Filling the Phases ---
+
+# 1. Ferromagnetic Phase (Top Lobe)
+# Fill under the curve
 plt.fill_betweenx(b_plot, 0, T_plot, color='lightblue')
-plt.fill_between([0, 20], b_crit, 1, color='lightblue', label='Ordered Phase')
-# Everything "below/right" is Disordered (only valid for b < b_crit)
-plt.fill_betweenx(b_plot, T_plot, 20, color='lightyellow', label='Disordered Phase')
+# Fill the "Always Ordered" strip above the asymptote
+plt.fill_between([0, 20], b_crit, 1, color='lightblue', label='Ferromagnetic (Ordered)')
 
-plt.text(1, 0.8, 'Ordered\n(Even at T=$\infty$)', ha='center', fontsize=10, color='blue')
-plt.text(6, 0.1, 'Disordered', ha='center', fontsize=12)
+# 2. Antiferromagnetic Phase (Bottom Lobe)
+# Fill "above" the negative curve (mathematically, between 0 and Tc)
+plt.fill_betweenx(b_plot_neg, 0, T_plot, color='lightgreen')
+# Fill the "Always Ordered" strip below the negative asymptote
+plt.fill_between([0, 20], -1, -b_crit, color='lightgreen', label='Antiferromagnetic (Ordered)')
+
+# 3. Disordered Phase (The middle channel)
+# We fill everything else with a light color to show the "Disordered River"
+plt.fill_betweenx(np.linspace(-b_crit, b_crit, 100), 20, 0, color='lightyellow', alpha=0.3, zorder=-1)
+
+
+# --- Labels ---
+plt.text(2, 0.7, 'Ferromagnetic', ha='center', fontsize=10, color='blue', fontweight='bold')
+plt.text(2, -0.7, 'Antiferromagnetic', ha='center', fontsize=10, color='green', fontweight='bold')
+plt.text(6, 0.0, 'Disordered', ha='center', fontsize=12)
 
 plt.legend(loc='lower right')
 plt.tight_layout()
