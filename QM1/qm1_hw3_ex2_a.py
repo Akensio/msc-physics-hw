@@ -24,62 +24,54 @@ def get_momentum(E, x_arr):
     return p
 
 # Create Plot
-fig, axs = plt.subplots(1, 2, figsize=(12, 5))
+fig, ax = plt.subplots(1, 1, figsize=(12, 5))
 
 # Plot 1: E < V_max
 p_below = get_momentum(E_below, x)
 # Plot potential for reference (scaled)
-axs[0].plot(x, V_x, 'k--', alpha=0.3, label='Potential V(x)')
-axs[0].axhline(E_below, color='g', linestyle=':', label=f'Energy E={E_below}')
+ax.plot(x, V_x, 'k--', alpha=0.3, label='Potential V(x)')
+ax.axhline(E_below, color='#0000ff80', linestyle=':', label=f'Energy E={E_below}')
 # Trajectories
 # Left side (x < 0)
-axs[0].plot(x[x<0], p_below[x<0], 'b', label='Left Trajectory (Reflected)')
-axs[0].plot(x[x<0], -p_below[x<0], 'b')
+ax.plot(x[x<0], p_below[x<0], 'b', label='Reflected Trajectories')
+ax.plot(x[x<0], -p_below[x<0], 'b')
 # Right side (x > 0)
-axs[0].plot(x[x>0], p_below[x>0], 'r', label='Right Trajectory (Reflected)')
-axs[0].plot(x[x>0], -p_below[x>0], 'r')
+ax.plot(x[x>0], p_below[x>0], 'b')
+ax.plot(x[x>0], -p_below[x>0], 'b')
 
-axs[0].set_title(f'Phase Space: Below Barrier (E={E_below} < Vmax={V_max})')
-axs[0].set_xlabel('Position x')
-axs[0].set_ylabel('Momentum p')
-axs[0].legend()
-axs[0].grid(True)
-axs[0].set_xlim(-4, 4)
-axs[0].set_ylim(-3, 3)
+ax.set_title(f'Phase Space Trajectories with Potential Barrier ($V_{{max}}$={V_max})')
+ax.set_xlabel('Position x')
+ax.set_ylabel('Momentum p')
+ax.grid(True)
+ax.set_xlim(-4, 4)
+ax.set_ylim(-3, 3)
 
 # Add arrows to indicate direction
 # Left trajectory: upper branch goes right, lower goes left
 idx_arrow_l = np.searchsorted(x, -2.0)
 if not np.isnan(p_below[idx_arrow_l]):
-    axs[0].arrow(x[idx_arrow_l], p_below[idx_arrow_l], 0.1, 0, head_width=0.15, head_length=0.1, fc='b', ec='b')
-    axs[0].arrow(x[idx_arrow_l], -p_below[idx_arrow_l], -0.1, 0, head_width=0.15, head_length=0.1, fc='b', ec='b')
+    ax.arrow(x[idx_arrow_l], p_below[idx_arrow_l], 0.1, 0, head_width=0.15, head_length=0.1, fc='b', ec='b')
+    ax.arrow(x[idx_arrow_l], -p_below[idx_arrow_l], -0.1, 0, head_width=0.15, head_length=0.1, fc='b', ec='b')
 
 # Right trajectory: upper branch goes right (out), lower goes left (in)
 idx_arrow_r = np.searchsorted(x, 2.0)
 if not np.isnan(p_below[idx_arrow_r]):
-    axs[0].arrow(x[idx_arrow_r], -p_below[idx_arrow_r], -0.1, 0, head_width=0.15, head_length=0.1, fc='r', ec='r')
-    axs[0].arrow(x[idx_arrow_r], p_below[idx_arrow_r], 0.1, 0, head_width=0.15, head_length=0.1, fc='r', ec='r')
+    ax.arrow(x[idx_arrow_r], -p_below[idx_arrow_r], -0.1, 0, head_width=0.15, head_length=0.1, fc='b', ec='b')
+    ax.arrow(x[idx_arrow_r], p_below[idx_arrow_r], 0.1, 0, head_width=0.15, head_length=0.1, fc='b', ec='b')
 
 
 # Plot 2: E > V_max
 p_above = get_momentum(E_above, x)
-axs[1].plot(x, V_x, 'k--', alpha=0.3, label='Potential V(x)')
-axs[1].axhline(E_above, color='g', linestyle=':', label=f'Energy E={E_above}')
+ax.axhline(E_above, color='#FF000080', linestyle=':', label=f'Energy E={E_above}')
 # Trajectories
-axs[1].plot(x, p_above, 'b', label='Right-moving Particle (Transmitted)')
-axs[1].plot(x, -p_above, 'r', label='Left-moving Particle (Transmitted)')
+ax.plot(x, p_above, 'r', label='Transmitted Trajectories')
+ax.plot(x, -p_above, 'r')
 
-axs[1].set_title(f'Phase Space: Above Barrier (E={E_above} > Vmax={V_max})')
-axs[1].set_xlabel('Position x')
-axs[1].set_ylabel('Momentum p')
-axs[1].legend()
-axs[1].grid(True)
-axs[1].set_xlim(-4, 4)
-axs[1].set_ylim(-3, 3)
+ax.legend()
 
 # Arrows
-axs[1].arrow(0, p_above[500], 0.1, 0, head_width=0.15, head_length=0.1, fc='b', ec='b')
-axs[1].arrow(0, -p_above[500], -0.1, 0, head_width=0.15, head_length=0.1, fc='r', ec='r')
+ax.arrow(0, p_above[500], 0.1, 0, head_width=0.15, head_length=0.1, fc='r', ec='r')
+ax.arrow(0, -p_above[500], -0.1, 0, head_width=0.15, head_length=0.1, fc='r', ec='r')
 
 plt.tight_layout()
 plt.savefig('phase_space_barrier.png')

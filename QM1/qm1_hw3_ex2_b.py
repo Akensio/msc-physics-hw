@@ -32,7 +32,7 @@ p_real_plot = p_real.copy()
 p_real_plot[forbidden_mask] = np.nan 
 
 # Plot Real parts (Blue)
-ax.plot(x, p_real_plot, np.zeros_like(x), 'b', lw=2, label='Real Trajectories (Re(p))')
+ax.plot(x, p_real_plot, np.zeros_like(x), 'b', lw=2, label='Real Trajectories')
 ax.plot(x, -p_real_plot, np.zeros_like(x), 'b', lw=2)
 
 # Create arrays for plotting imaginary trajectories
@@ -40,14 +40,33 @@ p_imag_plot = p_imag.copy()
 # Insert NaNs in the allowed region so the green line only appears in the tunnel
 p_imag_plot[~forbidden_mask] = np.nan
 
-ax.plot(x, np.zeros_like(x), p_imag_plot, 'r--', lw=2, label='Tunneling/Instanton (Im(p))')
-ax.plot(x, np.zeros_like(x), -p_imag_plot, 'r--', lw=2)
+ax.plot(x, np.zeros_like(x), p_imag_plot, 'b--', lw=2, label='Tunneling/Instanton')
+ax.plot(x, np.zeros_like(x), -p_imag_plot, 'b--', lw=2)
 
 # Labels
 ax.set_xlabel('Position x')
 ax.set_ylabel('Real Momentum Re(p)')
 ax.set_zlabel('Imaginary Momentum Im(p)')
-ax.set_title(f'3D Phase Space with Tunneling Path (E={E})')
+ax.set_title('3D Phase Space with Tunneling Path')
+
+# Add arrows to indicate direction
+# Left trajectory: upper branch goes right, lower goes left
+idx_arrow_l = np.searchsorted(x, -2.2)
+if not np.isnan(p_real[idx_arrow_l]):
+    ax.quiver(x[idx_arrow_l], p_real[idx_arrow_l], 0, 1, 0, 0, length=0.1, arrow_length_ratio=2, fc='b', ec='b')
+    ax.quiver(x[idx_arrow_l], -p_real[idx_arrow_l], 0, -1, 0, 0, length=0.1, arrow_length_ratio=2, fc='b', ec='b')
+
+# Right trajectory: upper branch goes right (out), lower goes left (in)
+idx_arrow_r = np.searchsorted(x, 2.2)
+if not np.isnan(p_real[idx_arrow_r]):
+    ax.quiver(x[idx_arrow_r], -p_real[idx_arrow_r], 0, 1, 0, 0, length=0.1, arrow_length_ratio=2, fc='b', ec='b')
+    ax.quiver(x[idx_arrow_r], p_real[idx_arrow_r], 0, -1, 0, 0, length=0.1, arrow_length_ratio=2, fc='b', ec='b')
+
+# Add arrows to imaginary part in the tunneling region
+idx_arrow_tunnel = np.searchsorted(x, 0.0)
+if not np.isnan(p_imag[idx_arrow_tunnel]):
+    ax.quiver(x[idx_arrow_tunnel], 0, p_imag[idx_arrow_tunnel], 1, 0, 0, length=0.1, arrow_length_ratio=2, fc='b', ec='b')
+    ax.quiver(x[idx_arrow_tunnel], 0, -p_imag[idx_arrow_tunnel], -1, 0, 0, length=0.1, arrow_length_ratio=2, fc='b', ec='b')
 
 # Mark the turning points
 turning_indices = np.where(np.diff(forbidden_mask.astype(int)) != 0)[0]
