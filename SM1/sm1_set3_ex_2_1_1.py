@@ -56,11 +56,11 @@ for _ in range(n_sweeps):
     spins, m_current = metropolis_step_direct(spins, m_current)
     m_history.append(m_current)
 
-bins = np.linspace(-1 - 1.0/N, 1 + 1.0/N, N + 2)
 
 # --- Plotting ---
+bins = np.linspace(-1 - 1.0/N, 1 + 1.0/N, N + 2)
 plt.figure(figsize=(8, 5))
-plt.hist(m_history, bins=128, density=True, color='skyblue', edgecolor='black', alpha=0.7)
+plt.hist(m_history, bins=bins, density=True, color='skyblue', edgecolor='black', alpha=0.7)
 plt.title(f'Direct Sampling Distribution ($N={N}, T={T}$)')
 plt.xlabel('Magnetization $m$')
 plt.ylabel('Probability Density $P_{direct}(m)$')

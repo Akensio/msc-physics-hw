@@ -13,7 +13,7 @@ m0 = 0.6
 
 # Simulation settings
 n_eq = 2000
-n_sweeps = 20000 
+n_sweeps = 2000
 
 def get_umbrella_potential(m):
     return 0.5 * k * (m - m0)**2
@@ -72,7 +72,7 @@ plt.hist(m_history, bins=bins, density=True, color='salmon', edgecolor='black', 
 plt.title(f'Biased Umbrella Sampling ($k={k}, m_0={m0}$)')
 plt.xlabel('Magnetization $m$')
 plt.ylabel('Biased Probability $P_U(m)$')
-plt.axvline(x=0.5, color='red', linestyle='--', label='Target Region')
+plt.axvline(x=0.6, color='red', linestyle='--', label='Target Region')
 plt.grid(True, alpha=0.3)
 plt.legend()
 plt.show()
