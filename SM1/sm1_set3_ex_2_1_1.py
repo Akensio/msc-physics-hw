@@ -11,7 +11,7 @@ beta = 1.0 / T
 n_eq = 2000     # Sweeps for equilibration (convergence)
 n_sweeps = 1000 # Sweeps for data collection (problem suggests ~1000, 10k is smoother)
 
-def calc_mag(spins):
+def calculate_magnetization(spins):
     """Calculate magnetization per spin."""
     return np.mean(spins)
 
@@ -44,7 +44,7 @@ def metropolis_step_direct(spins, current_m):
 # --- Simulation ---
 # 1. Initialize random spins
 spins = np.random.choice([-1, 1], size=N)
-m_current = calc_mag(spins)
+m_current = calculate_magnetization(spins)
 
 # 2. Equilibrate (Reach thermal equilibrium)
 for _ in range(n_eq):
@@ -56,9 +56,11 @@ for _ in range(n_sweeps):
     spins, m_current = metropolis_step_direct(spins, m_current)
     m_history.append(m_current)
 
+bins = np.linspace(-1 - 1.0/N, 1 + 1.0/N, N + 2)
+
 # --- Plotting ---
 plt.figure(figsize=(8, 5))
-plt.hist(m_history, bins=50, density=True, color='skyblue', edgecolor='black', alpha=0.7)
+plt.hist(m_history, bins=128, density=True, color='skyblue', edgecolor='black', alpha=0.7)
 plt.title(f'Direct Sampling Distribution ($N={N}, T={T}$)')
 plt.xlabel('Magnetization $m$')
 plt.ylabel('Probability Density $P_{direct}(m)$')
