@@ -17,7 +17,12 @@ def harmonic_wavefunction(n, x, l=1.0):
 # Plot 1: Standard Landau Levels
 plt.figure(figsize=(10, 8))
 U = 0.5 * (x - x0)**2
-plt.plot(x, U, 'k-', lw=2, label='Potential $U(x)$')
+
+# REMOVE AXES NUMBERS
+plt.xticks([]) 
+plt.yticks([])
+
+plt.plot(x, U, 'k-', lw=2, label='Harmonic Oscillator Potential $U(x)$')
 
 # Scale factor for plotting wavefunctions on the energy levels
 scale = 0.8
@@ -39,7 +44,7 @@ plt.ylim(0, 6)
 plt.xlim(-5, 5)
 plt.xlabel('x')
 plt.ylabel('Energy / Probability Density')
-plt.title('Landau Levels (Harmonic Oscillator States) in Landau Gauge')
+plt.title('Landau Levels (Schematically)')
 plt.legend(loc='upper right')
 plt.grid(True, which='both', linestyle=':', alpha=0.3)
 plt.savefig('landau_levels_standard.png')
@@ -54,9 +59,13 @@ plt.figure(figsize=(10, 8))
 x_wall = np.linspace(-5, wall_x, 500)
 U_wall = 0.5 * (x_wall - x0)**2
 
-plt.plot(x_wall, U_wall, 'k-', lw=2, label='Potential $U(x)$')
+# REMOVE AXES NUMBERS
+plt.xticks([]) 
+plt.yticks([])
+
+plt.plot(x_wall, U_wall, 'k-', lw=2, label='Harmonic Oscillator Potential $U(x)$')
 # Add vertical wall
-plt.axvline(x=wall_x, color='red', lw=4, label='Potential Wall $U(x) = \\infty$')
+plt.axvline(x=wall_x, color='red', lw=4, label='Potential Wall $V(x) = \\infty$')
 
 for n in range(n_levels):
     En = n + 0.5
@@ -75,7 +84,7 @@ plt.ylim(0, 6)
 plt.xlim(-5, 5)
 plt.xlabel('x')
 plt.ylabel('Energy / Probability Density')
-plt.title('Landau Levels Near a Potential Wall (Qualitative)')
+plt.title('Landau Levels Near a Potential Wall (Schematically)')
 plt.legend(loc='upper left')
 plt.grid(True, which='both', linestyle=':', alpha=0.3)
 plt.savefig('landau_levels_wall.png')
