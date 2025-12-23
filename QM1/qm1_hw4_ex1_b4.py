@@ -47,7 +47,7 @@ for n in range(n_levels):
 plt.axvline(x=a, color='red', lw=2, label='Wall Position')
 plt.title('Landau Level Dispersion: Energy $\\epsilon_n$ vs. Guiding Center $x_0$ (Schematically)', fontsize=16)
 plt.xlabel('Guiding Center Position ($x_0$)', fontsize=14)
-plt.ylabel('Energy ($\\epsilon / \hbar\omega_c$)', fontsize=14)
+plt.ylabel('Energy', fontsize=14)
 
 # Y-limit adjusted to show the skyrocketing "Wedge" energy
 plt.ylim(0, 15)
