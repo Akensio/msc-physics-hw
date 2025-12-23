@@ -7,9 +7,9 @@ from scipy.linalg import eigh_tridiagonal
 # Constants
 l = 1.0
 x0 = 0.0
-a = 1.647
+a = -2
 n_levels = 5
-x_min, x_max = -5.0, 5.0
+x_min, x_max = -10.0, 10.0
 N = 1000
 
 # 1. Analytic (Unperturbed) eigenfunctions
@@ -25,7 +25,7 @@ dx = x_shifted[1] - x_shifted[0]
 U_shifted = 0.5 * (x_shifted - x0)**2
 main_diag = 1.0 / (dx**2) + U_shifted
 off_diag = -0.5 / (dx**2) * np.ones(N-1)
-vals_shifted, vecs_shifted = eigh_tridiagonal(main_diag, off_diag, select='i', select_range=(0, 5))
+vals_shifted, vecs_shifted = eigh_tridiagonal(main_diag, off_diag, select='i', select_range=(0, n_levels-1))
 
 # Plotting
 plt.figure(figsize=(12, 10))
@@ -62,7 +62,7 @@ plt.title('Landau Levels (Schematically)', fontsize=16)
 plt.xlabel('x', fontsize=12)
 plt.ylabel('Energy / Probability Density', fontsize=12)
 plt.xlim(x_min, x_max)
-plt.ylim(0, 7)
+plt.ylim(0, 20)
 
 # Remove numbers
 plt.xticks([])
