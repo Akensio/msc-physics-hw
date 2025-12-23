@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def solve_yang_lee_zeros(N_values, beta_J=1.0):
+def solve_yang_lee_zeros(N_values, beta_J):
     """
     Solves and plots Yang-Lee zeros in the complex rho plane.
     """
@@ -61,4 +61,4 @@ def solve_yang_lee_zeros(N_values, beta_J=1.0):
 # Parameters from problem
 # "Choose the value for beta J at your convenience" -> We choose 1.0
 N_list = [10, 50, 500]
-solve_yang_lee_zeros(N_list, beta_J=1.0)
+solve_yang_lee_zeros([20], beta_J=-0.2)
