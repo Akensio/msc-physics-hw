@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.linalg import eigh_tridiagonal
 
 # Parameters
-n_levels = 10
+n_levels = 20
 W = 6.0
 L, R = -W/2, W/2
 x0_range = np.linspace(-50, 50, 200)  # Guiding center sweep

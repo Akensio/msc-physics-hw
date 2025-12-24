@@ -9,8 +9,10 @@ l = 1.0
 x0 = 0.5  # Slightly off-center to see the asymmetry
 W = 5.0
 L, R = -W/2, W/2
-n_levels = 5
-x_min, x_max = -8.0, 8.0
+n_levels = 10
+x_min, x_max = -50.0, 50.0
+visual_x_min, visual_x_max = -8.0, 8.0
+visual_y_min, visual_y_max = 0, 20
 N = 1000
 
 # 1. Analytic (Unperturbed) eigenfunctions
@@ -68,8 +70,8 @@ for n in range(n_levels):
 plt.title('Landau Levels in a Finite Well (Schematically)', fontsize=16)
 plt.xlabel('x', fontsize=12)
 plt.ylabel('Energy / Probability Density', fontsize=12)
-plt.xlim(x_min, x_max)
-plt.ylim(0, max(vals_well) + 5)
+plt.xlim(visual_x_min, visual_x_max)
+plt.ylim(visual_y_min, visual_y_max)
 
 # Ticks off as per user preference
 plt.xticks([])
