@@ -3,10 +3,12 @@ import matplotlib.pyplot as plt
 from scipy.linalg import eigh_tridiagonal
 
 # Parameters
-n_levels = 20
-W = 2.0
+n_levels = 10
+W = 6.0
 L, R = -W/2, W/2
 x0_range = np.linspace(-50, 50, 200)  # Guiding center sweep
+visual_x_min, visual_x_max = -10.0, 10.0
+visual_y_min, visual_y_max = 0, 60
 N = 1000  # Grid points within the well
 
 # Containers for energy data
@@ -56,8 +58,8 @@ plt.xlabel('Guiding Center Position ($x_0$)', fontsize=14)
 plt.ylabel('Energy ($\\epsilon$)', fontsize=14)
 
 # Adjust limits
-plt.ylim(0, 500)
-plt.xlim(x0_range[0], x0_range[-1])
+plt.ylim(visual_y_min, visual_y_max)
+plt.xlim(visual_x_min, visual_x_max)
 
 plt.grid(True, which='both', linestyle='--', alpha=0.2)
 plt.legend(loc='upper center', fontsize='small', ncol=2)
