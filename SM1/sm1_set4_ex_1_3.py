@@ -2,95 +2,109 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
-def plot_tk_rotated_contours():
+def plot_tk_rotated_final():
     # 1. Setup the T-K Grid
     T_min, T_max = -2, 4
     K_min, K_max = -2, 4
-    resolution = 500
+    resolution = 800  # Increased for smoother lines
     
     t_vals = np.linspace(T_min, T_max, resolution)
     k_vals = np.linspace(K_min, K_max, resolution)
     T, K = np.meshgrid(t_vals, k_vals)
     
-    # 2. Transformation Equations
-    # We choose an angle 't' that orients the graph nicely
-    theta = -0.5
+    # 2. Transformation Equations (User's theta)
+    theta = 0.8
     
-    # Calculate a and b at every point in the grid
-    a_raw = T * np.cos(theta) - K * np.sin(theta)
-    b_raw = T * np.sin(theta) + K * np.cos(theta)
+    # Calculate a and b
+    x_tricritical = 1
+    y_tricritical = 1
+    T_shifterd = T - x_tricritical
+    K_shifterd = K - y_tricritical
+    a_raw = T_shifterd * np.cos(theta) + K_shifterd * np.sin(theta)
+    b_raw = -T_shifterd * np.sin(theta) + K_shifterd * np.cos(theta)
     
-    # Apply reflection
+    # Apply reflection/constants
     a = a_raw
     b = -b_raw
-    c = 1.0
+    c = 1/10
     
-    # 3. Define the Regions (Masks)
-    # Initialize grid to 0 (which will be '1 Solution')
+    # 3. Define the Regions (Masks) for coloring
     regions = np.zeros_like(T)
     
-    # Region: 3 Solutions (Ordered)
-    # Condition: a < 0
+    # Region 1: 3 Solutions (a < 0)
     mask_3sol = (a < 0)
     regions[mask_3sol] = 1 
     
-    # Region: 5 Solutions (Metastable)
-    # Condition: b < 0 AND 0 < a < b^2/3c
+    # Region 2: 5 Solutions (b < 0 AND 0 < a < b^2/3c)
     mask_5sol = (b < 0) & (a > 0) & (a < (b**2 / (3*c)))
     regions[mask_5sol] = 2
     
-    # Region: 1 Solution (Disordered) is the default (0)
-    
-    # 4. Plotting
+    # 4. Prepare Data for Lines (The "Split" trick)
+    # We create copies of the function values and set them to NaN 
+    # in the regions where we DON'T want the line drawn.
+
+    # A) 2nd Order Line (Solid): a=0, but only where b > 0
+    z_ising_solid = np.copy(a)
+    z_ising_solid[b < 0] = np.nan 
+
+    # B) Inner Spinodal (Dashed): a=0, but only where b < 0 
+    # (This is the "other half" of the straight line)
+    z_ising_dashed = np.copy(a)
+    z_ising_dashed[b > 0] = np.nan
+
+    # C) 1st Order Transition (Thick Solid): a = b^2/4c, only where b < 0
+    func_first = a - (b**2)/(4*c)
+    z_first_order = np.copy(func_first)
+    z_first_order[b > 0] = np.nan # Hide in Ising region
+
+    # D) Outer Spinodal (Dotted): a = b^2/3c, only where b < 0
+    func_outer = a - (b**2)/(3*c)
+    z_outer_spinodal = np.copy(func_outer)
+    z_outer_spinodal[b > 0] = np.nan
+
+    # 5. Plotting
     fig, ax = plt.subplots(figsize=(8, 6))
     
-    # Define Colors: 0->Green, 1->Blue, 2->Red
+    # Colors
     cmap = mcolors.ListedColormap(['lightgreen', 'lightblue', 'lightcoral'])
     bounds = [-0.5, 0.5, 1.5, 2.5]
     norm = mcolors.BoundaryNorm(bounds, cmap.N)
     
-    # Filled Contour Plot
+    # Draw Regions
     ax.contourf(T, K, regions, levels=[-0.5, 0.5, 1.5, 2.5], cmap=cmap, norm=norm)
     
-    # 5. Add The Lines (Contours)
-    # We plot the mathematical boundaries directly
+    # Draw Lines using the masked arrays
     
-    # A) 2nd Order Line (Ising): a = 0
-    # We limit this to the region where it's actually 2nd order (b > 0)
-    ax.contour(T, K, a, levels=[0], colors='black', linewidths=2, linestyles='solid')
+    # 1. Solid Straight Line (Ising Phase Transition)
+    ax.contour(T, K, z_ising_solid, levels=[0], colors='black', linewidths=1, linestyles='-')
     
-    # B) Spinodal Line: a = b^2 / 3c
-    # This defines the edge of the 5-solution region
-    spinodal_func = a - (b**2)/(3*c)
-    ax.contour(T, K, spinodal_func, levels=[0], colors='black', linewidths=1, linestyles='dotted')
+    # 2. Dashed Straight Line (Inner Spinodal / m=0 stability limit)
+    ax.contour(T, K, z_ising_dashed, levels=[0], colors='black', linewidths=1.5, linestyles='--')
     
-    # C) 1st Order Transition: a = b^2 / 4c
-    # This runs through the middle of the red region
-    trans_func = a - (b**2)/(4*c)
-    # We mask this to only show where b < 0 (inside the fork)
-    # A simple way in contour is to just plot it, but let's be cleaner:
-    # We can just plot the contour; it naturally curves correctly.
-    # To differentiate from the Ising line, we can just let it flow.
-    CS = ax.contour(T, K, trans_func, levels=[0], colors='black', linewidths=2.5, linestyles='solid')
+    # 3. Thick Curve (1st Order Phase Transition)
+    ax.contour(T, K, z_first_order, levels=[0], colors='black', linewidths=3, linestyles='-')
+    
+    # 4. Dotted Curve (Outer Spinodal)
+    ax.contour(T, K, z_outer_spinodal, levels=[0], colors='black', linewidths=1, linestyles=':')
 
-    # 6. Tricritical Point (Where a=0 and b=0)
-    # In this rotated frame, it's at T=0, K=0 (unless we shift T,K)
-    ax.plot(0, 0, 'o', color='purple', markersize=10, zorder=10, label='TCP')
+    # TCP Marker
+    ax.plot(x_tricritical, y_tricritical, 'o', color='purple', markersize=10, zorder=10, label='TCP')
+
+    # Make sure the aspect ratio is equal, so the parabola looks correct
+    ax.set_aspect('equal')
     
     # Annotations
-    # ax.text(1.5, -1, '3 Solutions\n(Ordered)', ha='center', color='black', fontsize=10, fontweight='bold')
-    # ax.text(-0.5, 3, '1 Solution\n(Disordered)', ha='center', color='black', fontsize=10, fontweight='bold')
-    # ax.text(1.8, 2.0, '5 Solutions', ha='center', color='black', fontsize=9, fontweight='bold', rotation=45)
-    
-    ax.set_title('Phase Diagram (Rotated & Reflected)\n'
-                 '$a = -(T \cos t - K \sin t)$\n'
-                 '$b = (T \sin t + K \cos t)$')
+    ax.set_title('Phase Diagram with Split Lines')
     ax.set_xlabel('Temperature (T)')
     ax.set_ylabel('Interaction (K)')
     ax.grid(True, linestyle=':', alpha=0.5)
     ax.legend(loc='upper left')
     
-    plt.savefig('rotated_phase_diagram.png')
+    # Set limits to match previous view if needed
+    ax.set_xlim(-2, 4)
+    ax.set_ylim(-2, 4)
+    
+    plt.savefig('final_phase_diagram.png')
     plt.show()
 
-plot_tk_rotated_contours()
+plot_tk_rotated_final()
