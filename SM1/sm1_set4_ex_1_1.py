@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 
 def plot_ab_graph_fill():
     # Define range for plotting
@@ -14,18 +15,19 @@ def plot_ab_graph_fill():
     a_pos = np.linspace(0, a_max, 200)
 
     # Region: 3 Solutions (a < 0)
-    ax.fill_between(a_neg, b_min, b_max, color=[0.6, 0.8, 1.0], label='3 Solutions')
+    ax.fill_between(a_neg, b_min, b_max, color=mcolors.CSS4_COLORS['lightblue'])
+    mcolors.BASE_COLORS
 
     # Region: 5 Solutions (0 < a < b^2/3c and b < 0)
     # This is equivalent to b < -sqrt(3*C*a)
     # To use fill_between, we find the b-boundary: b = -sqrt(3*C*a)
     b_boundary = -np.sqrt(3 * C * a_pos)
     # We only fill where the boundary is within our plot limits
-    ax.fill_between(a_pos, b_min, b_boundary, color=[1.0, 0.6, 0.6], label='5 Solutions')
+    ax.fill_between(a_pos, b_min, b_boundary, color=mcolors.CSS4_COLORS['lightcoral'])
 
     # Region: 1 Solution (The rest)
     # We fill from the b_boundary up to b_max
-    ax.fill_between(a_pos, b_boundary, b_max, color=[0.9, 0.9, 0.9], label='1 Solution')
+    ax.fill_between(a_pos, b_boundary, b_max, color=mcolors.CSS4_COLORS['lightgreen'])
 
     # --- 2. Add Boundaries (Lines) ---
     # Vertical line at a=0 (split style as requested previously)
@@ -45,12 +47,12 @@ def plot_ab_graph_fill():
     ax.set_ylim(b_min, b_max)
     ax.set_xlabel('a')
     ax.set_ylabel('b')
-    ax.set_title('Phase Diagram using fill_between')
+    ax.set_title('$F(m)=am^2+bm^4+cm^6$')
 
     # Annotations
     ax.text(-1, 0, '3 Solutions', ha='center', fontweight='bold')
     ax.text(1, 1, '1 Solution', ha='center', fontweight='bold')
-    ax.text(0.5, -1.5, '5 Solutions', ha='center', fontweight='bold', color='darkred')
+    ax.text(0.5, -1.5, '5 Solutions', ha='center', fontweight='bold')
     
     # Tricritical point
     ax.plot(0, 0, 'o', color='purple', markersize=8, zorder=5)
