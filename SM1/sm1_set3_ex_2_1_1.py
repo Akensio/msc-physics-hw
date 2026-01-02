@@ -69,12 +69,16 @@ def simulate_ising_direct(coupling_J, beta, number_of_spins, n_eq, n_sweeps):
 m_history = simulate_ising_direct(J, beta, N, n_eq, n_sweeps)
 
 # --- Plotting ---
+# Bin edges are placed at midpoints between possible magnetization values.
 bins = np.linspace(-1 - 1.0/N, 1 + 1.0/N, N + 2)
+
 plt.figure(figsize=(8, 5))
 plt.hist(m_history, bins=bins, density=True, color='skyblue', edgecolor='black', alpha=0.7)
+
 plt.title(f'Direct Sampling Distribution ($N={N}, T={T}$)')
 plt.xlabel('Magnetization $m$')
 plt.ylabel('Probability Density $P_{direct}(m)$')
+
 plt.axvline(x=0.5, color='r', linestyle='--', label='$m=0.5$ threshold')
 plt.legend()
 plt.grid(True, alpha=0.3)
