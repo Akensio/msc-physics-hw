@@ -10,7 +10,9 @@ N = 128
 T = 2.5
 beta = 1.0 / T
 k = 200.0
-m0 = 0.8
+m0 = 0.6
+n_sweeps = 1000
+n_eq = 2000
 
 
 def get_approximate_solution(beta, J, N, bin_centers):
@@ -20,8 +22,8 @@ def get_approximate_solution(beta, J, N, bin_centers):
     """
     eta = np.tanh(beta * J)
     sigma2 = (1.0 / N) * (1 + eta) / (1 - eta)
-    P_exact = (1.0 / np.sqrt(2 * np.pi * sigma2)) * np.exp(-bin_centers**2 / (2 * sigma2))
-    return P_exact
+    P_approx = (1.0 / np.sqrt(2 * np.pi * sigma2)) * np.exp(-bin_centers**2 / (2 * sigma2))
+    return P_approx
 
 
 def reweight_and_stitch(m_direct, m_umbrella, k, m0, beta, N):
@@ -64,11 +66,10 @@ def reweight_and_stitch(m_direct, m_umbrella, k, m0, beta, N):
     return bin_centers, P_direct, P_reweighted, C
 
 
-def plot_stitching_results(bin_centers, P_direct, P_reweighted, P_approx, params):
+def plot_stitching_results(bin_centers, P_direct, P_reweighted, P_approx, N, T, k, m0):
     """
     Plots the comparison: Direct, Umbrella and Gaussian Approximation.
     """
-    N, T, k, m0 = params['N'], params['T'], params['k'], params['m0']
     bin_width = bin_centers[1] - bin_centers[0]
     
     plt.figure(figsize=(10, 6))
@@ -87,7 +88,6 @@ def plot_stitching_results(bin_centers, P_direct, P_reweighted, P_approx, params
     plt.plot(bin_centers, P_approx, 'k--', label='Calculated Gaussian Approximation', 
              linewidth=1.5, alpha=0.8, zorder=4)
 
-    # plt.yscale('log')
     plt.xlabel('Magnetization $m$')
     plt.ylabel('Probability Density $P(m)$ (Log Scale)')
     plt.title(f'Stitching Distributions: Direct vs Umbrella Reweighted\n($N={N}, T={T}, k={k}, m_0={m0}$)')
@@ -98,18 +98,18 @@ def plot_stitching_results(bin_centers, P_direct, P_reweighted, P_approx, params
 if __name__ == "__main__":
     # 1. Run Simulations (using functions from 2.1.1 and 2.1.2)
     print("Running Simulations...")
-    m_history_direct = simulate_ising_direct(J, beta, N, n_eq=2000, n_sweeps=1000)
-    m_history_umbrella = simulate_ising_umbrella(J, beta, N, n_eq=2000, n_sweeps=1000, spring_k=k, target_m0=m0)
+    m_history_direct = simulate_ising_direct(J, beta, N, n_eq=n_eq, n_sweeps=n_sweeps)
+    m_history_umbrella = simulate_ising_umbrella(J, beta, N, n_eq=n_eq, n_sweeps=n_sweeps, spring_k=k, target_m0=m0)
 
     # 2. Process Data
     centers, P_direct, P_reweighted, C = reweight_and_stitch(
         m_history_direct, m_history_umbrella, k, m0, beta, N
     )
     print(f"Stitching Constant C: {C:.4e}")
+    print(f"P(m>=0.5) from reweighted umrella sampling: {np.sum(P_reweighted[centers >= 0.5]) * (centers[1]-centers[0]):.4e}")
 
     # 3. Get Approximate Solution for comparison
     P_approx = get_approximate_solution(beta, J, N, centers)
 
     # 4. Plot
-    params = {'N': N, 'T': T, 'k': k, 'm0': m0}
-    plot_stitching_results(centers, P_direct, P_reweighted, P_approx, params)
+    plot_stitching_results(centers, P_direct, P_reweighted, P_approx, N, T, k, m0)
