@@ -90,7 +90,8 @@ def plot_stitching_results(bin_centers, P_direct, P_reweighted, P_approx, N, T, 
 
     plt.xlabel('Magnetization $m$')
     plt.ylabel('Probability Density $P(m)$ (Log Scale)')
-    plt.title(f'Stitching Distributions: Direct vs Umbrella Reweighted\n($N={N}, T={T}, k={k}, m_0={m0}$)')
+    plt.title(f'Stitching Distributions: Direct vs Umbrella Reweighted\n($N={N}, T={T}, k={k}, m_0={m0}$)\n'
+              f'Found P(m>=0.5): {np.sum(P_reweighted[centers >= 0.5]) * (centers[1]-centers[0]):.4e}')
     plt.legend()
     plt.grid(True, which="both", ls="-", alpha=0.2)
     plt.show()
@@ -106,7 +107,6 @@ if __name__ == "__main__":
         m_history_direct, m_history_umbrella, k, m0, beta, N
     )
     print(f"Stitching Constant C: {C:.4e}")
-    print(f"P(m>=0.5) from reweighted umrella sampling: {np.sum(P_reweighted[centers >= 0.5]) * (centers[1]-centers[0]):.4e}")
 
     # 3. Get Approximate Solution for comparison
     P_approx = get_approximate_solution(beta, J, N, centers)
