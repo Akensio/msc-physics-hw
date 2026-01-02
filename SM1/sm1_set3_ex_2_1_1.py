@@ -1,61 +1,72 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# --- Parameters from Problem Statement ---
-J = 1.0         # Interaction strength [cite: 19]
-N = 128         # Number of spins [cite: 19]
-T = 2.5         # Temperature [cite: 19]
+
+# Simulation parameters
+J = 1.0 # Interaction strength
+N = 128 # Number of spins
+T = 2.5 # Temperature
 beta = 1.0 / T
 
 # Simulation settings
-n_eq = 2000     # Sweeps for equilibration (convergence)
-n_sweeps = 1000 # Sweeps for data collection (problem suggests ~1000, 10k is smoother)
+n_eq = 2000     # Sweeps for equilibration
+n_sweeps = 1000 # Sweeps for data collection
 
+# Helper functions
 def calculate_magnetization(spins):
     """Calculate magnetization per spin."""
     return np.mean(spins)
 
-def metropolis_step_direct(spins, current_m):
+
+def metropolis_step_direct(spins, current_m, coupling_J, beta, number_of_spins):
     """
-    Standard single-spin Metropolis step for 1D Ising model.
+    Metropolis step for 1D Ising model.
     Returns updated spins and magnetization.
     """
-    for _ in range(N):
+    for _ in range(number_of_spins):
         # Pick a random site.
         # While some implementations might take permutations of the sites and iterate these,
-        # such practices introduce memory, so to keep the process strictly memoryless
-        # and not accidentally break the detailed balance, we pick random sites.
-        i = np.random.randint(N)
+        # such practices introduce memory (in the probability-sense of the word),
+        # so to keep the process strictly memoryless and not accidentally break the 
+        # detailed balance, we pick random sites.
+        i = np.random.randint(number_of_spins)
         s = spins[i]
         
         # Calculate Energy Change (Periodic Boundary Conditions)
         # Neighbors: (i-1) and (i+1) with wrap-around
-        n_sum = spins[(i-1)%N] + spins[(i+1)%N]
-        dE = 2 * J * s * n_sum
+        n_sum = spins[(i-1)%number_of_spins] + spins[(i+1)%number_of_spins]
+        dE = 2 * coupling_J * s * n_sum
         
         # Metropolis Acceptance Criterion
-        if dE < 0 or np.random.rand() < np.exp(-beta * dE):
+        if (dE < 0) or (np.random.rand() < np.exp(-beta * dE)):
             spins[i] *= -1
             # Update magnetization incrementally to save time
-            current_m += -2 * s / N
+            current_m += -2 * s / number_of_spins
             
     return spins, current_m
 
-# --- Simulation ---
-# 1. Initialize random spins
-spins = np.random.choice([-1, 1], size=N)
-m_current = calculate_magnetization(spins)
 
-# 2. Equilibrate (Reach thermal equilibrium)
-for _ in range(n_eq):
-    spins, m_current = metropolis_step_direct(spins, m_current)
+def simulate_ising_direct(coupling_J, beta, number_of_spins, n_eq, n_sweeps):
+    """Simulate the 1D Ising model using direct sampling."""
+    # --- Simulation ---
+    # 1. Initialize random spins
+    spins = np.random.choice([-1, 1], size=number_of_spins)
+    m_current = calculate_magnetization(spins)
 
-# 3. Collect Data
-m_history = []
-for _ in range(n_sweeps):
-    spins, m_current = metropolis_step_direct(spins, m_current)
-    m_history.append(m_current)
+    # 2. Equilibrate (Reach thermal equilibrium)
+    for _ in range(n_eq):
+        spins, m_current = metropolis_step_direct(spins, m_current, coupling_J, beta, number_of_spins)
 
+    # 3. Collect Data
+    m_history = []
+    for _ in range(n_sweeps):
+        spins, m_current = metropolis_step_direct(spins, m_current, coupling_J, beta, number_of_spins)
+        m_history.append(m_current)
+
+    return m_history
+
+
+m_history = simulate_ising_direct(J, beta, N, n_eq, n_sweeps)
 
 # --- Plotting ---
 bins = np.linspace(-1 - 1.0/N, 1 + 1.0/N, N + 2)
