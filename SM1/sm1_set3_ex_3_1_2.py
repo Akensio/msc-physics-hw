@@ -20,8 +20,7 @@ def solve_yang_lee_zeros(N_values, beta_J=1.0):
             theta = np.pi * (2 * k + 1) / N
             u_k = np.exp(1j * theta)
             
-            # Derived auxiliary variable K = ((1+u)/(1-u))^2
-            # Handle singularity if u_k approaches 1 (not possible for roots of -1)
+            # Derived variable K = ((1+u)/(1-u))^2
             term = (1 + u_k) / (1 - u_k)
             K = term**2
             
@@ -43,7 +42,6 @@ def solve_yang_lee_zeros(N_values, beta_J=1.0):
         
         zeros = np.array(zeros)
         
-        # Plotting
         plt.scatter(zeros.real, zeros.imag, label=f'N={N}', s=15, alpha=0.6, c=colors[idx])
         
     # Draw unit circle for reference
@@ -60,5 +58,6 @@ def solve_yang_lee_zeros(N_values, beta_J=1.0):
 
 # Parameters from problem
 # "Choose the value for beta J at your convenience" -> We choose 1.0
+# Tweak this list for different amounts of roots
 N_list = [10, 50, 500]
 solve_yang_lee_zeros(N_list, beta_J=1.0)

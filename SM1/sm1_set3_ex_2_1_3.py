@@ -1,108 +1,98 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import numba as nb
+from sm1_set3_ex_2_1_1 import simulate_ising_direct
+from sm1_set3_ex_2_1_2 import simulate_ising_umbrella, calculate_bias_potential
 
-# --- 1. Parameters & Setup (Same as your Part 2 code) ---
+# --- 1. Setup & Parameters ---
+# (Assumes functions from 2_1_1 and 2_1_2 are imported)
 J = 1.0
 N = 128
 T = 2.5
 beta = 1.0 / T
+k = 200.0   # Umbrella strength
+m0 = 0.8    # Umbrella center
 
-# Umbrella Parameters
-k = 200.0
-m0 = 0.6
+# --- 2. Run Simulations ---
+print("Running Direct Sampling (Reference)...")
+m_history_direct = simulate_ising_direct(J, beta, N, n_eq=2000, n_sweeps=5000)
 
-# Simulation settings
-n_eq = 2000
-n_sweeps = 50000  # Increased sweeps slightly to get a smoother histogram for reweighting
+print("Running Umbrella Sampling (Biased)...")
+m_history_umbrella = simulate_ising_umbrella(J, beta, N, n_eq=2000, n_sweeps=5000, spring_k=k, target_m0=m0)
 
-@nb.njit()
-def get_umbrella_potential(m):
-    return 0.5 * k * (m - m0)**2
-
-@nb.njit()
-def metropolis_step_umbrella(spins, current_m):
-    for _ in range(N):
-        i = np.random.randint(N)
-        s = spins[i]
-        
-        # Proposed change: flip s -> -s implies delta_m = -2s/N
-        m_new = current_m - (2.0 * s / N)
-        
-        # Energy Changes
-        # 1. Ising Energy (Nearest Neighbor)
-        n_sum = spins[(i-1)%N] + spins[(i+1)%N]
-        dE_ising = 2 * J * s * n_sum
-        
-        # 2. Umbrella Potential Change
-        dW = get_umbrella_potential(m_new) - get_umbrella_potential(current_m)
-        
-        # Total dH
-        dH = dE_ising + dW
-        
-        if dH < 0 or np.random.rand() < np.exp(-beta * dH):
-            spins[i] *= -1
-            current_m = m_new
-            
-    return spins, current_m
-
-# --- 2. Run Simulation to get P_U(m) ---
-spins = np.random.choice([-1, 1], size=N)
-m_current = np.mean(spins)
-
-# Equilibrate
-for _ in range(n_eq):
-    spins, m_current = metropolis_step_umbrella(spins, m_current)
-
-# Collect Data
-m_history = []
-for _ in range(n_sweeps):
-    spins, m_current = metropolis_step_umbrella(spins, m_current)
-    m_history.append(m_current)
-
-# --- 3. Reweighting Analysis ---
-
-# Define bins exactly as in Part 2 so they center on valid magnetization steps
+# --- 3. Histogramming ---
+# Define bins exactly the same for both
 bins = np.linspace(-1 - 1.0/N, 1 + 1.0/N, N + 2)
+bin_centers = 0.5 * (bins[1:] + bins[:-1])
+bin_width = bins[1] - bins[0]
 
-# Get the biased histogram counts (P_U)
-# density=True gives a probability density-like scaling, but for discrete reweighting 
-# it is often easier to work with raw counts and normalize at the end.
-counts, bin_edges = np.histogram(m_history, bins=bins)
+# Calculate raw probability densities
+P_direct, _ = np.histogram(m_history_direct, bins=bins, density=True)
+P_U, _ = np.histogram(m_history_umbrella, bins=bins, density=True)
 
-# Calculate the center of each bin (these are the valid m values: -1, ..., 1)
-bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+# --- 4. Reweighting (The Identity) ---
+# Identity: P_true(m) = C * P_biased(m) * exp(beta * W(m))
+# Calculate the bias potential W(m) for all bin centers
+W_m = calculate_bias_potential(bin_centers, k, m0)
 
-# Calculate the Reweighting Factor: e^{+beta * W(m)}
-# Note: P_true(m) ~ P_umbrella(m) * exp(beta * W(m))
-weights = np.exp(beta * get_umbrella_potential(bin_centers))
+# Calculate the reweighting factor e^{beta * W(m)}
+reweight_factor = np.exp(beta * W_m)
 
-# Recover the unnormalized true probability
-# We avoid multiplying where counts are 0 to keep things clean
-P_recovered_unnormalized = counts * weights
+# Unnormalized Reweighted Distribution
+P_US_unnorm = P_U * reweight_factor
 
-# Normalize the result so the sum of probabilities equals 1
-# (This assumes we are viewing this as a PMF over the discrete states)
-total_prob = np.sum(P_recovered_unnormalized)
+# --- 5. Normalization (The "Stitching" Method) ---
+# Find C by matching P_direct and P_umbrella_unnorm in their overlap region
+overlap_mask = (P_direct > 0.01) & (P_US_unnorm > 0)
 
-if total_prob > 0:
-    P_recovered = P_recovered_unnormalized / total_prob
+if np.sum(overlap_mask) == 0:
+    print("Warning: No sufficient overlap found. Check simulation parameters.")
+    raise ValueError("No overlap between Direct and Umbrella distributions.")
 else:
-    P_recovered = P_recovered_unnormalized # Should not happen if data exists
+    # Calculate ratio P_direct / P_umbrella for all overlap bins
+    ratios = P_direct[overlap_mask] / P_US_unnorm[overlap_mask]
+    C = np.mean(ratios)
+    print(f"Normalization Constant C found: {C:.4e}")
 
-# --- 4. Plotting ---
+# Apply normalization
+P_umbrella_reweighted = P_US_unnorm * C
+
+# --- 6. Exact Solution (Gaussian Approximation) ---
+eta = np.tanh(beta * J)
+sigma2 = (1.0 / N) * (1 + eta) / (1 - eta)
+P_exact = (1.0 / np.sqrt(2 * np.pi * sigma2)) * np.exp(-bin_centers**2 / (2 * sigma2))
+
+# --- 7. Plotting ---
 plt.figure(figsize=(10, 6))
 
-# Plot only the recovered distribution (P_recovered)
-# We use a bar plot or stem plot because the data is discrete
-width = 2.0/N
-plt.bar(bin_centers, P_recovered, width=width, color='skyblue', edgecolor='blue', alpha=0.7, label='Reweighted $P(m)$')
+# A. Plot Direct Sampling (The Middle) - kept as scatter for clarity
+plt.plot(bin_centers, P_direct, 'o', label='Direct Sampling', 
+         color='skyblue', markersize=4, alpha=0.9, zorder=3)
 
-plt.title(f'Reweighted Probability Distribution\n(Recovered from Umbrella Sampling at $m_0={m0}$)')
+# B. Plot Reweighted Umbrella as a HISTOGRAM (Bar Chart)
+# We use bin_centers for x and P_umbrella_reweighted for height
+# We filter out zero values to avoid cluttering the log-plot bottom
+valid_indices = P_umbrella_reweighted > 0
+plt.bar(bin_centers[valid_indices], P_umbrella_reweighted[valid_indices], 
+        width=bin_width, label='Reweighted Umbrella', color='salmon', 
+        edgecolor='darkred', alpha=0.6, linewidth=0.5, zorder=2)
+
+# C. Plot Exact Solution
+plt.plot(bin_centers, P_exact, 'k--', label='Exact (Gaussian Approx)', linewidth=1.5, alpha=0.8, zorder=4)
+
+# Formatting
+# plt.yscale('log') 
 plt.xlabel('Magnetization $m$')
-plt.ylabel('Probability $P(m)$')
-# plt.yscale('log') # Log scale is usually best to see the rare event statistics
-plt.grid(True, which="both", ls="-", alpha=0.2)
+plt.ylabel('Probability Density $P(m)$ (Log Scale)')
+plt.title(f'Stitching Distributions: Direct vs Umbrella Reweighted\n($N={N}, T={T}, k={k}, m_0={m0}$)')
 plt.legend()
+plt.grid(True, which="both", ls="-", alpha=0.2)
+plt.xlim(-0.2, 0.8) 
+plt.ylim(1e-10, 10) 
 
 plt.show()
+
+# Compare specific values at m >= 0.5
+print("\nComparison in Tail Region (m >= 0.5):")
+tail_mask = bin_centers >= 0.5
+print(f"Mean Prob (Reweighted): {np.mean(P_umbrella_reweighted[tail_mask]):.4e}")
+print(f"Mean Prob (Exact):      {np.mean(P_exact[tail_mask]):.4e}")

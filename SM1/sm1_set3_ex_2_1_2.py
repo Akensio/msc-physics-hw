@@ -91,25 +91,25 @@ def simulate_ising_umbrella(coupling_J, beta, number_of_spins, n_eq, n_sweeps, s
         
     return m_history
 
+if __name__ == "__main__":
+    # Run the Simulation
+    m_history_umbrella = simulate_ising_umbrella(J, beta, N, n_eq, n_sweeps, k, m0)
 
-# Run the Simulation
-m_history_umbrella = simulate_ising_umbrella(J, beta, N, n_eq, n_sweeps, k, m0)
 
+    # --- Plotting ---
+    # Bin edges are placed at midpoints between possible magnetization values.
+    bins = np.linspace(-1 - 1.0/N, 1 + 1.0/N, N + 2)
 
-# --- Plotting ---
-# Bin edges are placed at midpoints between possible magnetization values.
-bins = np.linspace(-1 - 1.0/N, 1 + 1.0/N, N + 2)
+    plt.figure(figsize=(10, 6))
+    plt.hist(m_history_umbrella, bins=bins, density=True, color='salmon', edgecolor='black', alpha=0.7)
 
-plt.figure(figsize=(10, 6))
-plt.hist(m_history_umbrella, bins=bins, density=True, color='salmon', edgecolor='black', alpha=0.7)
+    plt.title(f'Biased Umbrella Sampling Distribution\n($N={N}, T={T}, k={k}, m_0={m0}$)')
+    plt.xlabel('Magnetization $m$')
+    plt.ylabel('Biased Probability Density $P_U(m)$')
 
-plt.title(f'Biased Umbrella Sampling Distribution\n($N={N}, T={T}, k={k}, m_0={m0}$)')
-plt.xlabel('Magnetization $m$')
-plt.ylabel('Biased Probability Density $P_U(m)$')
+    plt.axvline(x=0.5, color='r', linestyle='--', label='$m=0.5$ threshold')
+    plt.axvline(x=m0, color='b', linestyle='--', label=f'Umbrella Bias Center $m_0={m0}$')
 
-plt.axvline(x=0.5, color='r', linestyle='--', label='$m=0.5$ threshold')
-plt.axvline(x=m0, color='b', linestyle='--', label=f'Umbrella Bias Center $m_0={m0}$')
-
-plt.legend()
-plt.grid(True, alpha=0.3)
-plt.show()
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.show()
