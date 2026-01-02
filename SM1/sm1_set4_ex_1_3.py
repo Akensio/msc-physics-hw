@@ -4,16 +4,16 @@ import matplotlib.colors as mcolors
 
 def plot_tk_rotated_final():
     # 1. Setup the T-K Grid
-    T_min, T_max = -2, 4
-    K_min, K_max = -2, 4
-    resolution = 800  # Increased for smoother lines
+    T_min, T_max = 0, 4
+    K_min, K_max = 0, 4
+    resolution = 800
     
     t_vals = np.linspace(T_min, T_max, resolution)
     k_vals = np.linspace(K_min, K_max, resolution)
     T, K = np.meshgrid(t_vals, k_vals)
     
     # 2. Transformation Equations (User's theta)
-    theta = 0.8
+    theta = np.pi / 6
     
     # Calculate a and b
     x_tricritical = 1
@@ -94,16 +94,16 @@ def plot_tk_rotated_final():
     ax.set_aspect('equal')
     
     # Annotations
-    ax.set_title('Phase Diagram with Split Lines')
-    ax.set_xlabel('Temperature (T)')
-    ax.set_ylabel('Interaction (K)')
+    ax.set_title('Phase Diagram (Rotated, Reflected, Shifted)')
+    ax.set_xlabel('T')
+    ax.set_ylabel('K')
     ax.grid(True, linestyle=':', alpha=0.5)
     ax.legend(loc='upper left')
     
     # Set limits to match previous view if needed
-    ax.set_xlim(-2, 4)
-    ax.set_ylim(-2, 4)
-    
+    ax.set_xlim(0, 4)
+    ax.set_ylim(0, 4)
+
     plt.savefig('final_phase_diagram.png')
     plt.show()
 
