@@ -89,7 +89,7 @@ def plot_stitching_results(bin_centers, P_direct, P_reweighted, P_approx, N, T, 
              linewidth=1.5, alpha=0.8, zorder=4)
 
     plt.xlabel('Magnetization $m$')
-    plt.ylabel('Probability Density $P(m)$ (Log Scale)')
+    plt.ylabel('Probability Density $P(m)$')
     plt.title(f'Stitching Distributions: Direct vs Umbrella Reweighted\n($N={N}, T={T}, k={k}, m_0={m0}$)\n'
               f'Found P(m>=0.5): {np.sum(P_reweighted[centers >= 0.5]) * (centers[1]-centers[0]):.4e}')
     plt.legend()
