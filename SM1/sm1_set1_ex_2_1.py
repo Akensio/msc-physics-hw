@@ -216,7 +216,6 @@ def plot_properties(F_brute: sp.Expr, F_transfer: sp.Expr, F_lambda: sp.Expr,
     ax1.plot(T_values, F_lambda_plot, label='F(T) Approx. ($\\lambda_1^N$)', color='red', linestyle=':')
     
     ax1.set_ylabel('Free Energy', fontsize=20)
-    # ax1.set_yscale('log') # Z grows very fast, log scale is better
     ax1.set_title(title, fontsize=20)
     ax1.grid(True)
     ax1.legend()
