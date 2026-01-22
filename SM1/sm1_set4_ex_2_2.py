@@ -4,39 +4,40 @@ import matplotlib.pyplot as plt
 # --- CONFIGURATION ---
 N = 1000
 J = 1.0
-steps = 4000
+steps = 200
 T_start = 1.0
 T_stop = 0.1
 T_steps = 100
 
 
-def metropolis_step(spins, state_counts, q, N, J, beta):
+def run_metropolis_sweep(spins, counts, q, N, J, beta):
     """
-    Performs a single Metropolis update step.
-    Modifies 'spins' and 'state_counts' in-place.
+    Performs one Monte Carlo Sweep (N attempts).
+    This ensures every spin is updated on average once per sweep.
     """
-    # 1. Pick random spin
-    i = np.random.randint(0, N)
-    old_state = spins[i]
-    
-    # 2. Pick new random state (must be different from current)
-    new_state = np.random.randint(0, q)
-    while new_state == old_state:
-        new_state = np.random.randint(0, q)
+    for _ in range(N):
+        # 1. Pick random spin
+        i = np.random.randint(0, N)
+        old_state = spins[i]
         
-    # 3. Calculate Energy Change
-    # As the energy is determined by N_k(N_k -1 ) for each k,
-    # dE is proportional to the change in counts of the old and new states.
-    N_k_old = state_counts[old_state]
-    N_k_new = state_counts[new_state]
-    
-    dE = -(J / N) * (N_k_new - N_k_old + 1)
-    
-    # 4. Metropolis Acceptance
-    if dE < 0 or np.random.rand() < np.exp(-beta * dE):
-        spins[i] = new_state
-        state_counts[old_state] -= 1
-        state_counts[new_state] += 1
+        # 2. Pick new random state
+        new_state = np.random.randint(0, q)
+        while new_state == old_state:
+            new_state = np.random.randint(0, q)
+            
+        # 3. Calculate Energy Change
+        # dE is derived from Mean Field Energy: E = -(J/2N) * sum(N_k^2)
+        N_old = counts[old_state]
+        N_new = counts[new_state]
+        
+        # Change in counts: N_new goes up, N_old goes down
+        dE = -(J / N) * (N_new - N_old + 1)
+        
+        # 4. Metropolis Acceptance
+        if dE < 0 or np.random.rand() < np.exp(-beta * dE):
+            spins[i] = new_state
+            counts[old_state] -= 1
+            counts[new_state] += 1
 
 
 def get_magnetization(state_counts, q, N):
@@ -59,7 +60,7 @@ def run_mean_field_potts(q, N, T_steps, J, steps_per_temp):
     # Initialize spins random state 0 to q-1
     spins = np.random.randint(0, q, N)
     
-    # Initialize counts for efficiency
+    # Initialize counts of each of the q states
     counts = np.zeros(q, dtype=int)
     for s in spins:
         counts[s] += 1
@@ -72,7 +73,7 @@ def run_mean_field_potts(q, N, T_steps, J, steps_per_temp):
         
         for step in range(steps_per_temp):
             # Run one simulation step
-            metropolis_step(spins, counts, q, N, J, beta)
+            run_metropolis_sweep(spins, counts, q, N, J, beta)
             
             # Measure Order Parameter (only in second half to let system equilibrate for each temperature)
             if step > steps_per_temp // 2:
