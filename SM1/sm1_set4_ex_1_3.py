@@ -26,7 +26,7 @@ def plot_tk_rotated_final():
     # Apply reflection/constants
     a = a_raw
     b = -b_raw
-    c = 1/10
+    c = 1/6
     
     # 3. Define the Regions (Masks) for coloring
     regions = np.zeros_like(T)
