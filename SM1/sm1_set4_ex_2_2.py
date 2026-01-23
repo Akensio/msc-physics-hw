@@ -101,7 +101,7 @@ plt.plot(temps, mag_q2, 'b-o', label='$q=2$ (2nd Order)', markersize=4)
 
 plt.plot(temps, mag_q3, 'r-s', label='$q=3$ (1st Order)', markersize=4)
 
-plt.xlabel('Temperature ($\frac{k_B T}{J}$)')
+plt.xlabel('Temperature ($\\frac{k_B T}{J}$)')
 plt.ylabel('Order Parameter $M$')
 plt.title(f'Mean Field Potts Model (N={N})')
 
