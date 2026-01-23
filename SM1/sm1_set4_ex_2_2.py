@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 # --- CONFIGURATION ---
 N = 1000
 J = 1.0
-steps = 200
+steps_per_T = 20
 T_start = 1.0
 T_stop = 0.1
 T_steps = 100
@@ -72,7 +72,6 @@ def run_mean_field_potts(q, N, T_steps, J, steps_per_temp):
         m = 0
         
         for step in range(steps_per_temp):
-            # Run one simulation step
             run_metropolis_sweep(spins, counts, q, N, J, beta)
             
             # Measure Order Parameter (only in second half to let system equilibrate for each temperature)
@@ -81,11 +80,7 @@ def run_mean_field_potts(q, N, T_steps, J, steps_per_temp):
                 
         # Average the measurements for this temperature
         measurements_count = steps_per_temp // 2
-        # Avoid division by zero if steps_per_temp is 0 or 1
-        if measurements_count > 0:
-            avg_mag.append(m / measurements_count)
-        else:
-            avg_mag.append(get_magnetization(counts, q, N))
+        avg_mag.append(m / measurements_count)
 
     return avg_mag
 
@@ -94,27 +89,24 @@ temps = np.linspace(T_start, T_stop, T_steps)
 
 # --- SIMULATION ---
 print("Simulating q=2 (Ising)...")
-mag_q2 = run_mean_field_potts(q=2, N=N, T_steps=temps, J=J, steps_per_temp=steps)
+mag_q2 = run_mean_field_potts(q=2, N=N, T_steps=temps, J=J, steps_per_temp=steps_per_T)
 
 print("Simulating q=3 (Potts)...")
-mag_q3 = run_mean_field_potts(q=3, N=N, T_steps=temps, J=J, steps_per_temp=steps)
+mag_q3 = run_mean_field_potts(q=3, N=N, T_steps=temps, J=J, steps_per_temp=steps_per_T)
 
 # --- PLOTTING ---
 plt.figure(figsize=(10, 6))
 
-# Plot q=2
-plt.plot(temps, mag_q2, 'b-o', label='q=2 (2nd Order)', markersize=4)
+plt.plot(temps, mag_q2, 'b-o', label='$q=2$ (2nd Order)', markersize=4)
 
-# Plot q=3
-plt.plot(temps, mag_q3, 'r-s', label='q=3 (1st Order)', markersize=4)
+plt.plot(temps, mag_q3, 'r-s', label='$q=3$ (1st Order)', markersize=4)
 
-plt.xlabel('Temperature ($k_B T / J$)')
+plt.xlabel('Temperature ($\frac{k_B T}{J}$)')
 plt.ylabel('Order Parameter $M$')
 plt.title(f'Mean Field Potts Model (N={N})')
-plt.axvline(x=0.5, color='b', linestyle='--', alpha=0.3, label='Tc(q=2) ~ 0.5')
 
 plt.grid(True)
 plt.legend()
 plt.gca().invert_xaxis() 
-plt.savefig('mean_field_potts_refactored.png')
+plt.savefig('mean_field_potts.png')
 plt.show()
