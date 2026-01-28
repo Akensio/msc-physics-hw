@@ -1,155 +1,168 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.ndimage import label
-
-# --- Configuration ---
-L_SIZE = 2048
-TRIALS = 100  # Number of realizations for part 1
-P_STEPS = np.arange(0, 1.05, 0.05)
-PC_ESTIMATE = 0.593  # From tutorial text
+from collections import deque
 
 
-def check_percolation(lattice):
+def generate_lattice(L, p):
+    """Generates a LxL lattice with site probability p."""
+    return np.random.rand(L, L) < p
+
+
+# Question 2.1.1: BFS Algorithm
+def has_percolation_top_to_bottom(lattice):
     """
-    Checks if there is a path from the top row to the bottom row using
-    Nearest Neighbor (NN) connectivity.
+    BFS implementation to check for a path from top row to bottom row.
+    Returns True if a path exists.
     """
-    # Structure defines connectivity: [[0,1,0],[1,1,1],[0,1,0]] is NN (4-neighbors)
-    structure = [[0, 1, 0],
-                 [1, 1, 1],
-                 [0, 1, 0]]
+    L = lattice.shape[0]
     
-    labeled_array, num_features = label(lattice, structure=structure)
+    # 1. Initialize Queue with all occupied sites in the top row (row 0)
+    queue = deque()
+    visited = set()
     
-    if num_features == 0:
-        return False
-    
-    # Get labels present in the top and bottom rows
-    top_labels = np.unique(labeled_array[0, :])
-    bottom_labels = np.unique(labeled_array[-1, :])
-    
-    # 0 is the background (empty sites), remove it
-    top_labels = top_labels[top_labels > 0]
-    bottom_labels = bottom_labels[bottom_labels > 0]
-    
-    # Check intersection
-    return not set(top_labels).isdisjoint(bottom_labels)
+    # Add all occupied cells in the first row to the queue
+    for col in range(L):
+        if lattice[0, col]:
+            state = (0, col)
+            queue.append(state)
+            visited.add(state)
+            
+    # 2. Run BFS
+    while queue:
+        r, c = queue.popleft()
+        
+        # If we reached the bottom row, we have a spanning cluster
+        if r == L - 1:
+            return True
+        
+        # Check 4 neighbors (Up, Down, Left, Right)
+        # Yes, there is a redundancy here. For a more efficient implementation,
+        # we could avoid re-checking visited nodes, but clarity is prioritized.
+        neighbors = [
+            (r+1, c), (r-1, c), 
+            (r, c+1), (r, c-1)
+        ]
+        
+        for nr, nc in neighbors:
+            # Check bounds
+            if 0 <= nr < L and 0 <= nc < L:
+                # Check if site is occupied and not visited
+                if lattice[nr, nc] and (nr, nc) not in visited:
+                    visited.add((nr, nc))
+                    queue.append((nr, nc))
+                    
+    return False
 
-def decimate_lattice(lattice):
-    """
-    Performs majority decimation on 2x2 blocks.
-    Rule: A block is 'active' if there is a path from top to bottom WITHIN the 2x2 block.
+def solve_2_1_1():
+    print("--- Running Question 2.1.1 (Percolation Threshold) ---")
+    print("WARNING: THIS IS SLOW")
+    L_large = 2048 # Note: BFS on 2048x2048 in Python is slow. 
+                   # For testing, you might want to try L=128 first.
     
-    In a 2x2 block with NN connectivity:
-    [[a, b],
-     [c, d]]
-    A path from top (a, b) to bottom (c, d) exists ONLY if:
-    (a AND c) is True  OR  (b AND d) is True.
-    """
-    # Slice the array to get 2x2 windows
-    # Top-left (a): rows 0,2,4... cols 0,2,4...
-    a = lattice[0::2, 0::2]
-    # Top-right (b): rows 0,2,4... cols 1,3,5...
-    b = lattice[0::2, 1::2]
-    # Bottom-left (c): rows 1,3,5... cols 0,2,4...
-    c = lattice[1::2, 0::2]
-    # Bottom-right (d): rows 1,3,5... cols 1,3,5...
-    d = lattice[1::2, 1::2]
-    
-    # Apply the percolation rule for the 2x2 block
-    # Note: This matches the polynomial 2p^2 - p^4 derived in standard texts and the tutorial
-    new_lattice = (a & c) | (b & d)
-    
-    return new_lattice.astype(int)
+    # Step size of 0.05 as requested
+    p_values = np.arange(0, 1.01, 0.05)
+    spanning_probs = []
 
-def ex_2_1_percolation_probability():
-    print("Running Part 1: Probability of Percolation...")
-    percolation_probs = []
+    # Using 10 trials for speed in this demonstration. 
+    # Homework asks for 100 trials.
+    num_trials = 10 
 
-    for p in P_STEPS:
+    for p in p_values:
         success_count = 0
-        for _ in range(TRIALS):
-            # Generate random lattice (1 = filled, 0 = empty)
-            lattice = (np.random.rand(L_SIZE, L_SIZE) < p).astype(int)
-            if check_percolation(lattice):
+        for _ in range(num_trials):
+            lat = generate_lattice(L_large, p)
+            if has_percolation_top_to_bottom(lat):
                 success_count += 1
         
-        prob = success_count / TRIALS
-        percolation_probs.append(prob)
-        print(f"p={p:.2f}, P(percolate)={prob:.2f}")
+        prob = success_count / num_trials
+        spanning_probs.append(prob)
+        print(f"p={p:.2f} | P(spanning)={prob:.2f}")
 
-    plt.figure(figsize=(10, 6))
-    plt.plot(P_STEPS, percolation_probs, 'o-', label='Simulation')
-    plt.axvline(x=PC_ESTIMATE, color='r', linestyle='--', label=f'Theoretical $p_c \\approx {PC_ESTIMATE}$')
-    plt.xlabel('Occupation Probability $p$')
-    plt.ylabel('Percolation Probability $P(p)$')
-    plt.title('Percolation Transition on 2048x2048 Lattice')
+    # Plotting
+    plt.figure(figsize=(8, 5))
+    plt.plot(p_values, spanning_probs, 'o-', linewidth=2)
+    plt.axvline(x=0.5927, color='red', linestyle='--', label='Theoretical $p_c$')
+    plt.title(f"Percolation Probability (L={L_large})")
+    plt.xlabel("p")
+    plt.ylabel("P(spanning)")
     plt.legend()
     plt.grid(True)
-    plt.show()
+    plt.savefig("")
 
-def ex_2_2_rg_decimation():
-    print("\nRunning Part 2: RG Decimation...")
-    p_values = [0.55, PC_ESTIMATE, 0.65]
-    colors = ['blue', 'green', 'red']
-    labels = ['Sub-critical ($p=0.55$)', 'Critical ($p \\approx p_c$)', 'Super-critical ($p=0.65$)']
+# ==========================================
+# Question 2.1.2: Decimation & Reshape
+# ==========================================
+def decimate_majority(lattice):
+    """
+    Coarse grains the lattice by a factor of 2.
+    Rule: A new site is 1 if there is a vertical path in the underlying 2x2 block.
+    """
+    L_y, L_x = lattice.shape
+    new_L_y, new_L_x = L_y // 2, L_x // 2
+    
+    # 1. Reshape to isolate 2x2 blocks
+    # Logic: Break L into (L/2) chunks of 2.
+    # Result shape: (Rows of blocks, Rows inside block, Cols of blocks, Cols inside block)
+    view = lattice[:2*new_L_y, :2*new_L_x].reshape(new_L_y, 2, new_L_x, 2)
+    
+    # 2. Extract corners using slicing
+    # view[:, 0, :, 0] means: For all blocks, take row 0 (top), col 0 (left)
+    TL = view[:, 0, :, 0] # Top-Left
+    TR = view[:, 0, :, 1] # Top-Right
+    BL = view[:, 1, :, 0] # Bottom-Left
+    BR = view[:, 1, :, 1] # Bottom-Right
+    
+    # 3. Apply Connectivity Rule
+    # Vertical path exists if:
+    # (Left column is full) OR (Right column is full)
+    left_col_path = (TL & BL)
+    right_col_path = (TR & BR)
+    
+    new_lattice = left_col_path | right_col_path
+    return new_lattice
 
-    plt.figure(figsize=(12, 8))
-
-    for idx, p in enumerate(p_values):
-        # Single realization
-        lattice = (np.random.rand(L_SIZE, L_SIZE) < p).astype(int)
-        current_lattice = lattice
-        densities = []
+def solve_2_1_2():
+    print("\n--- Running Question 2.1.2 (RG Decimation) ---")
+    L = 2048
+    # Exact critical p for site percolation is approx 0.592746
+    p_critical = 0.5927
+    p_scenarios = [p_critical, 0.55, 0.65]
+    
+    iterations = 5
+    
+    fig, axes = plt.subplots(len(p_scenarios), iterations + 1, figsize=(12, 8))
+    
+    for row, p in enumerate(p_scenarios):
+        # Initial Lattice
+        lat = generate_lattice(L, p)
+        density = np.mean(lat)
         
-        # Store initial state for visualization
-        initial_lattice = current_lattice.copy()
+        # Plot initial (cropped for visibility)
+        ax = axes[row, 0]
+        ax.imshow(lat[:64, :64], cmap='binary', vmin=0, vmax=1)
+        ax.set_ylabel(f"Start p={p}")
+        ax.set_title(f"Gen 0\n$\\rho={density:.2f}$")
+        ax.set_xticks([]); ax.set_yticks([])
         
-        # Perform decimation until lattice is too small
-        step = 0
-        while current_lattice.shape[0] >= 2:
-            densities.append(np.mean(current_lattice))
-            current_lattice = decimate_lattice(current_lattice)
-            step += 1
+        # Decimate loop
+        current_lat = lat
+        for i in range(iterations):
+            current_lat = decimate_majority(current_lat)
+            density = np.mean(current_lat)
             
-        densities.append(np.mean(current_lattice)) # Final point
-        
-        # Plot active site percentage vs decimation step
-        plt.plot(range(len(densities)), densities, 'o-', color=colors[idx], label=labels[idx])
-        
-        # Show the decimated lattices (Optional visualization logic)
-        # We display the state after 8 steps (2048 -> 2^3 = 8 sized lattice) just as an example
-        # Or we can simply describe the result.
-
-    plt.xlabel('RG Step (Decimation Iteration)')
-    plt.ylabel('Density of Active Sites')
-    plt.title('RG Flow of Active Site Density')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-
-    # Optional: Visualize specific decimated lattices for the critical case
-    lattice_pc = (np.random.rand(L_SIZE, L_SIZE) < PC_ESTIMATE).astype(int)
-    fig, axes = plt.subplots(1, 4, figsize=(15, 4))
-    fig.suptitle(f'Visualizing Decimation at Critical Point $p={PC_ESTIMATE}$')
-
-    current = lattice_pc
-    steps_to_show = [0, 3, 6, 9] # Original, and after some decimations
-
-    plot_idx = 0
-    for i in range(10):
-        if i in steps_to_show:
-            ax = axes[plot_idx]
-            ax.imshow(current, cmap='binary', interpolation='nearest')
-            ax.set_title(f'Step {i}\nSize: {current.shape[0]}x{current.shape[0]}')
-            ax.axis('off')
-            plot_idx += 1
-        if current.shape[0] < 2: break
-        current = decimate_lattice(current)
+            ax = axes[row, i+1]
+            # Show crop if large, full if small
+            if current_lat.shape[0] > 64:
+                ax.imshow(current_lat[:64, :64], cmap='binary', vmin=0, vmax=1)
+            else:
+                ax.imshow(current_lat, cmap='binary', vmin=0, vmax=1)
+                
+            ax.set_title(f"Gen {i+1}\n$\\rho={density:.2f}$")
+            ax.set_xticks([]); ax.set_yticks([])
 
     plt.tight_layout()
     plt.show()
 
 if __name__ == "__main__":
-    ex_2_1_percolation_probability()
-    ex_2_2_rg_decimation()
+    solve_2_1_1() 
+    solve_2_1_2()
