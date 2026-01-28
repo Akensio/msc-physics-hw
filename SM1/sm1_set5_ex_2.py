@@ -89,80 +89,112 @@ def solve_2_1_1():
     plt.grid(True)
     plt.savefig("")
 
-# ==========================================
+
 # Question 2.1.2: Decimation & Reshape
-# ==========================================
-def decimate_majority(lattice):
+def decimate_spanning_rule(lattice):
     """
-    Coarse grains the lattice by a factor of 2.
-    Rule: A new site is 1 if there is a vertical path in the underlying 2x2 block.
+    Coarse grains the lattice by a factor of 2 using the SPANNING rule.
+    (Mistakenly called 'majority' in the prompt text, but defined as connectivity).
     """
     L_y, L_x = lattice.shape
     new_L_y, new_L_x = L_y // 2, L_x // 2
     
     # 1. Reshape to isolate 2x2 blocks
-    # Logic: Break L into (L/2) chunks of 2.
-    # Result shape: (Rows of blocks, Rows inside block, Cols of blocks, Cols inside block)
+    # Shape: (Rows of blocks, 2, Cols of blocks, 2)
     view = lattice[:2*new_L_y, :2*new_L_x].reshape(new_L_y, 2, new_L_x, 2)
     
-    # 2. Extract corners using slicing
-    # view[:, 0, :, 0] means: For all blocks, take row 0 (top), col 0 (left)
+    # 2. Extract pixels
     TL = view[:, 0, :, 0] # Top-Left
     TR = view[:, 0, :, 1] # Top-Right
     BL = view[:, 1, :, 0] # Bottom-Left
     BR = view[:, 1, :, 1] # Bottom-Right
     
-    # 3. Apply Connectivity Rule
-    # Vertical path exists if:
-    # (Left column is full) OR (Right column is full)
-    left_col_path = (TL & BL)
-    right_col_path = (TR & BR)
+    # 3. Apply Vertical Path Rule
+    # Path exists if Left Col connects OR Right Col connects
+    path_exists = (TL & BL) | (TR & BR)
     
-    new_lattice = left_col_path | right_col_path
-    return new_lattice
+    return path_exists
 
-def solve_2_1_2():
-    print("\n--- Running Question 2.1.2 (RG Decimation) ---")
-    L = 2048
-    # Exact critical p for site percolation is approx 0.592746
-    p_critical = 0.5927
-    p_scenarios = [p_critical, 0.55, 0.65]
+def run_exercise_2_1_2():
+    print("Running Exercise 2.1.2...")
     
-    iterations = 5
+    # Parameters explicitly requested
+    L_start = 2048
+    scenarios = [0.5927, 0.55, 0.65] # p_c, p < p_c, p > p_c
     
-    fig, axes = plt.subplots(len(p_scenarios), iterations + 1, figsize=(12, 8))
-    
-    for row, p in enumerate(p_scenarios):
-        # Initial Lattice
-        lat = generate_lattice(L, p)
-        density = np.mean(lat)
+    # We will store data for the final plot
+    results = {} 
+
+    # Create figure for the lattice images (Visualizing the RG flow)
+    # 3 rows (scenarios), 5 columns (generations 0 to 4)
+    fig_img, axes = plt.subplots(3, 5, figsize=(15, 9))
+    fig_img.suptitle("Visualizing RG Flow (Decimation of Single Realization)", fontsize=16)
+
+    for idx, p in enumerate(scenarios):
+        # 1. "Choose a single realization" 
+        current_lattice = generate_lattice(L_start, p)
         
-        # Plot initial (cropped for visibility)
-        ax = axes[row, 0]
-        ax.imshow(lat[:64, :64], cmap='binary', vmin=0, vmax=1)
-        ax.set_ylabel(f"Start p={p}")
-        ax.set_title(f"Gen 0\n$\\rho={density:.2f}$")
-        ax.set_xticks([]); ax.set_yticks([])
+        # Store density history for this specific realization
+        densities = []
         
-        # Decimate loop
-        current_lat = lat
-        for i in range(iterations):
-            current_lat = decimate_majority(current_lat)
-            density = np.mean(current_lat)
+        # 2. Iteratively Decimate
+        # We will do 5 steps (Generation 0 to 4)
+        for gen in range(5):
+            # Calculate "percentage of active sites" [cite: 37]
+            density = np.mean(current_lattice)
+            densities.append(density)
             
-            ax = axes[row, i+1]
-            # Show crop if large, full if small
-            if current_lat.shape[0] > 64:
-                ax.imshow(current_lat[:64, :64], cmap='binary', vmin=0, vmax=1)
+            # Plot the lattice (taking a crop if it's too huge to see details)
+            ax = axes[idx, gen]
+            
+            # If lattice is huge, zoom in on top-left 64x64 corner so we can see pixels
+            # If lattice is small, show the whole thing
+            if current_lattice.shape[0] > 64:
+                display_data = current_lattice[:64, :64]
+                title_extra = "(Zoom)"
             else:
-                ax.imshow(current_lat, cmap='binary', vmin=0, vmax=1)
+                display_data = current_lattice
+                title_extra = "(Full)"
                 
-            ax.set_title(f"Gen {i+1}\n$\\rho={density:.2f}$")
-            ax.set_xticks([]); ax.set_yticks([])
+            ax.imshow(display_data, cmap='binary', vmin=0, vmax=1)
+            ax.set_title(f"p={p}, Gen {gen}\nActive: {density:.1%}")
+            ax.axis('off')
+            
+            # Decimate for next round
+            if gen < 4: # Don't decimate after the last plot
+                current_lattice = decimate_spanning_rule(current_lattice)
+        
+        results[p] = densities
 
     plt.tight_layout()
     plt.show()
 
+    # 3. "Plot the percentage of active sites as a function of the decimation" [cite: 37]
+    plt.figure(figsize=(10, 6))
+    generations = range(5)
+    
+    for p, densities in results.items():
+        if p == 0.5927:
+            label = f"$p=p_c \\approx {p}$ (Critical)"
+            style = 'o--r'
+        elif p == 0.55:
+            label = f"$p={p}$ (Sub-critical)"
+            style = 'o-b'
+        else:
+            label = f"$p={p}$ (Super-critical)"
+            style = 'o-g'
+            
+        plt.plot(generations, densities, style, label=label, linewidth=2)
+
+    plt.title("RG Flow: Percentage of Active Sites vs Decimation Step")
+    plt.xlabel("Decimation Step (Generation)")
+    plt.ylabel("Percentage of Active Sites")
+    plt.axhline(0, color='k', linestyle=':', alpha=0.3)
+    plt.axhline(1, color='k', linestyle=':', alpha=0.3)
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.show()
+
 if __name__ == "__main__":
-    solve_2_1_1() 
+    # solve_2_1_1()
     solve_2_1_2()
