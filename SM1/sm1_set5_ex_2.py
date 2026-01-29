@@ -1,3 +1,4 @@
+from matplotlib import cm
 import numpy as np
 import matplotlib.pyplot as plt
 import numba
@@ -10,18 +11,11 @@ def generate_lattice(L, p):
 
 
 # Question 2.1.1: BFS Algorithm
-import numpy as np
-from numba import njit
-
-# We use 'int16' for coordinates because 2048 fits inside 32,767.
-# This cuts memory usage in half compared to standard integers.
 @numba.njit()
 def has_percolation_numba_large(lattice):
     L = lattice.shape[0]
     
-    # 1. Pre-allocate memory for the worst-case scenario (every cell in queue)
-    # 2048 * 2048 = ~4.2 million items. 
-    # Using int16, these two arrays only take ~16MB of RAM total. Trivial.
+    # We allocate memory for numba ahead of time to avoid dynamic resizing (optimization)
     queue_r = np.empty(L * L, dtype=np.int16)
     queue_c = np.empty(L * L, dtype=np.int16)
     
@@ -42,12 +36,11 @@ def has_percolation_numba_large(lattice):
         c = queue_c[head]
         head += 1
         
-        # Check Win Condition
+        # Check percolation condition
         if r == L - 1:
             return True
         
-        # Check Neighbors (Manual unroll is fastest for Numba)
-        # We check bounds + occupancy in one go to keep the pipeline full
+        # Check neighbors (it's written in a very straightforward way that makes it faster with Numba)
         
         # DOWN
         if r + 1 < L and lattice[r + 1, c] == 1:
@@ -78,54 +71,13 @@ def has_percolation_numba_large(lattice):
             tail += 1
                 
     return False
-numba.njit()
-def has_percolation_top_to_bottom(lattice):
-    """
-    Optimized BFS. Destroys 'lattice' content to mark visited sites 
-    (turns 1s into 0s) to avoid using a slow 'visited' set.
-    """
-    L = lattice.shape[0]
-    queue = deque()
-
-    # Possible moves
-    moves = ((1, 0), (-1, 0), (0, 1), (0, -1))
-    
-    # Add start nodes from the top row.
-    for col in range(L):
-        # "1" means it has a tree.
-        if lattice[0, col] == 1:
-            # Mark visited by "burning" the place.
-            lattice[0, col] = 0
-            # Add to queue to check for neighbors
-            queue.append((0, col))
-
-    while queue:
-        row, col = queue.popleft()
-
-        for row_move, col_move in moves:
-            test_row, test_col = row + row_move, col + col_move
-            
-            # Check bounds
-            if (test_row < 0 or test_row >= L) or (test_col < 0 or test_col >= L):
-                continue
-
-            if lattice[test_row, test_col] == 1:
-                # If we reached the bottom, we have percolation
-                if test_row == L - 1:
-                    return True
-
-                lattice[test_row, test_col] = 0  # Mark visited
-                queue.append((test_row, test_col))
-
-    return False
 
 
 def solve_2_1_1():
     print("Running Question 2.1.1 (Percolation Threshold)")
     print("WARNING: THIS IS SLOW")
     L = 2048
-    
-    # Step size of 0.05 as requested in the homework
+
     p_values = np.arange(0, 1.01, 0.05)
     y_values = []
 
@@ -183,73 +135,53 @@ def decimate_spanning_rule(lattice):
 def solve_2_1_2():
     print("Running Exercise 2.1.2...")
     
-    # Parameters explicitly requested
-    L_start = 2048
-    scenarios = [0.5927, 0.55, 0.65] # p_c, p < p_c, p > p_c
-    
-    # We will store data for the final plot
+    L = 2048
+    SCENARIOS = [0.55, 0.593, 0.618, 0.65]
+    STEPS = 10
+
     results = {} 
 
-    # Create figure for the lattice images (Visualizing the RG flow)
-    # 3 rows (scenarios), 5 columns (generations 0 to 4)
-    fig_img, axes = plt.subplots(3, 5, figsize=(15, 9))
+    fig_img, axes = plt.subplots(len(SCENARIOS), STEPS, figsize=(15, 9))
     fig_img.suptitle("Visualizing RG Flow (Decimation of Single Realization)", fontsize=16)
 
-    for idx, p in enumerate(scenarios):
-        # 1. "Choose a single realization" 
-        current_lattice = generate_lattice(L_start, p)
-        
-        # Store density history for this specific realization
+    for idx, p in enumerate(SCENARIOS):
+        current_lattice = generate_lattice(L, p)
         densities = []
         
-        # 2. Iteratively Decimate
-        # We will do 5 steps (Generation 0 to 4)
-        for gen in range(5):
-            # Calculate "percentage of active sites" [cite: 37]
+        # Decimations
+        for gen in range(STEPS):
+            # Add column headers and row labels, but only on the edges.
+            if idx == 0:
+                axes[idx, gen].set_title(f"Gen {gen}\n($L={current_lattice.shape[0]}$)", fontsize=12, fontweight='bold')
+            if gen == 0:
+                axes[idx, gen].set_ylabel(f"$p = {p}$", fontsize=14, fontweight='bold', labelpad=10, rotation=90)
+
+            # Calculate "percentage of active sites"
             density = np.mean(current_lattice)
             densities.append(density)
             
-            # Plot the lattice (taking a crop if it's too huge to see details)
+            # Plot the lattice
             ax = axes[idx, gen]
-            
-            # If lattice is huge, zoom in on top-left 64x64 corner so we can see pixels
-            # If lattice is small, show the whole thing
-            if current_lattice.shape[0] > 64:
-                display_data = current_lattice[:64, :64]
-                title_extra = "(Zoom)"
-            else:
-                display_data = current_lattice
-                title_extra = "(Full)"
-                
-            ax.imshow(display_data, cmap='binary', vmin=0, vmax=1)
-            ax.set_title(f"p={p}, Gen {gen}\nActive: {density:.1%}")
+            ax.imshow(current_lattice, cmap='binary', vmin=0, vmax=1)
+            ax.set_title(f"Active: {density:.1%}")
             ax.axis('off')
             
             # Decimate for next round
-            if gen < 4: # Don't decimate after the last plot
-                current_lattice = decimate_spanning_rule(current_lattice)
+            current_lattice = decimate_spanning_rule(current_lattice)
         
         results[p] = densities
 
     plt.tight_layout()
     plt.savefig("rg_flow_lattices.png")
 
-    # 3. "Plot the percentage of active sites as a function of the decimation" [cite: 37]
+    # Plot the RG flow of active site percentages
     plt.figure(figsize=(10, 6))
-    generations = range(5)
+    generations = range(STEPS)
     
-    for p, densities in results.items():
-        if p == 0.5927:
-            label = f"$p=p_c \\approx {p}$ (Critical)"
-            style = 'o--r'
-        elif p == 0.55:
-            label = f"$p={p}$ (Sub-critical)"
-            style = 'o-b'
-        else:
-            label = f"$p={p}$ (Super-critical)"
-            style = 'o-g'
-            
-        plt.plot(generations, densities, style, label=label, linewidth=2)
+    colors = cm.plasma(np.linspace(0, 0.85, len(results)))
+    
+    for (p, densities), color in zip(results.items(), colors):
+        plt.plot(generations, densities, marker='o', linestyle='-', linewidth=2, color=color, label=f"$p={p}$")
 
     plt.title("RG Flow: Percentage of Active Sites vs Decimation Step")
     plt.xlabel("Decimation Step (Generation)")
@@ -258,8 +190,9 @@ def solve_2_1_2():
     plt.axhline(1, color='k', linestyle=':', alpha=0.3)
     plt.legend()
     plt.grid(True, alpha=0.3)
-    plt.show()
+    plt.savefig("rg_flow_active_sites.png")
+
 
 if __name__ == "__main__":
-    solve_2_1_1()
+    # solve_2_1_1()
     solve_2_1_2()
