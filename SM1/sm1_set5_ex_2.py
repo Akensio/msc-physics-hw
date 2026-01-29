@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import numba
 from collections import deque
 
 
@@ -9,85 +10,149 @@ def generate_lattice(L, p):
 
 
 # Question 2.1.1: BFS Algorithm
-def has_percolation_top_to_bottom(lattice):
-    """
-    BFS implementation to check for a path from top row to bottom row.
-    Returns True if a path exists.
-    """
+import numpy as np
+from numba import njit
+
+# We use 'int16' for coordinates because 2048 fits inside 32,767.
+# This cuts memory usage in half compared to standard integers.
+@numba.njit()
+def has_percolation_numba_large(lattice):
     L = lattice.shape[0]
     
-    # 1. Initialize Queue with all occupied sites in the top row (row 0)
-    queue = deque()
-    visited = set()
+    # 1. Pre-allocate memory for the worst-case scenario (every cell in queue)
+    # 2048 * 2048 = ~4.2 million items. 
+    # Using int16, these two arrays only take ~16MB of RAM total. Trivial.
+    queue_r = np.empty(L * L, dtype=np.int16)
+    queue_c = np.empty(L * L, dtype=np.int16)
     
-    # Add all occupied cells in the first row to the queue
+    head = 0
+    tail = 0
+    
+    # Initialize top row
     for col in range(L):
-        if lattice[0, col]:
-            state = (0, col)
-            queue.append(state)
-            visited.add(state)
+        if lattice[0, col] == 1:
+            lattice[0, col] = 0
+            queue_r[tail] = 0
+            queue_c[tail] = col
+            tail += 1
             
-    # 2. Run BFS
-    while queue:
-        r, c = queue.popleft()
+    while head < tail:
+        # "Pop" from the head
+        r = queue_r[head]
+        c = queue_c[head]
+        head += 1
         
-        # If we reached the bottom row, we have a spanning cluster
+        # Check Win Condition
         if r == L - 1:
             return True
         
-        # Check 4 neighbors (Up, Down, Left, Right)
-        # Yes, there is a redundancy here. For a more efficient implementation,
-        # we could avoid re-checking visited nodes, but clarity is prioritized.
-        neighbors = [
-            (r+1, c), (r-1, c), 
-            (r, c+1), (r, c-1)
-        ]
+        # Check Neighbors (Manual unroll is fastest for Numba)
+        # We check bounds + occupancy in one go to keep the pipeline full
         
-        for nr, nc in neighbors:
+        # DOWN
+        if r + 1 < L and lattice[r + 1, c] == 1:
+            lattice[r + 1, c] = 0 # Mark visited
+            queue_r[tail] = r + 1
+            queue_c[tail] = c
+            tail += 1
+            
+        # UP
+        if r - 1 >= 0 and lattice[r - 1, c] == 1:
+            lattice[r - 1, c] = 0
+            queue_r[tail] = r - 1
+            queue_c[tail] = c
+            tail += 1
+            
+        # RIGHT
+        if c + 1 < L and lattice[r, c + 1] == 1:
+            lattice[r, c + 1] = 0
+            queue_r[tail] = r
+            queue_c[tail] = c + 1
+            tail += 1
+
+        # LEFT
+        if c - 1 >= 0 and lattice[r, c - 1] == 1:
+            lattice[r, c - 1] = 0
+            queue_r[tail] = r
+            queue_c[tail] = c - 1
+            tail += 1
+                
+    return False
+numba.njit()
+def has_percolation_top_to_bottom(lattice):
+    """
+    Optimized BFS. Destroys 'lattice' content to mark visited sites 
+    (turns 1s into 0s) to avoid using a slow 'visited' set.
+    """
+    L = lattice.shape[0]
+    queue = deque()
+
+    # Possible moves
+    moves = ((1, 0), (-1, 0), (0, 1), (0, -1))
+    
+    # Add start nodes from the top row.
+    for col in range(L):
+        # "1" means it has a tree.
+        if lattice[0, col] == 1:
+            # Mark visited by "burning" the place.
+            lattice[0, col] = 0
+            # Add to queue to check for neighbors
+            queue.append((0, col))
+
+    while queue:
+        row, col = queue.popleft()
+
+        for row_move, col_move in moves:
+            test_row, test_col = row + row_move, col + col_move
+            
             # Check bounds
-            if 0 <= nr < L and 0 <= nc < L:
-                # Check if site is occupied and not visited
-                if lattice[nr, nc] and (nr, nc) not in visited:
-                    visited.add((nr, nc))
-                    queue.append((nr, nc))
-                    
+            if (test_row < 0 or test_row >= L) or (test_col < 0 or test_col >= L):
+                continue
+
+            if lattice[test_row, test_col] == 1:
+                # If we reached the bottom, we have percolation
+                if test_row == L - 1:
+                    return True
+
+                lattice[test_row, test_col] = 0  # Mark visited
+                queue.append((test_row, test_col))
+
     return False
 
-def solve_2_1_1():
-    print("--- Running Question 2.1.1 (Percolation Threshold) ---")
-    print("WARNING: THIS IS SLOW")
-    L_large = 2048 # Note: BFS on 2048x2048 in Python is slow. 
-                   # For testing, you might want to try L=128 first.
-    
-    # Step size of 0.05 as requested
-    p_values = np.arange(0, 1.01, 0.05)
-    spanning_probs = []
 
-    # Using 10 trials for speed in this demonstration. 
-    # Homework asks for 100 trials.
-    num_trials = 10 
+def solve_2_1_1():
+    print("Running Question 2.1.1 (Percolation Threshold)")
+    print("WARNING: THIS IS SLOW")
+    L = 2048
+    
+    # Step size of 0.05 as requested in the homework
+    p_values = np.arange(0, 1.01, 0.05)
+    y_values = []
+
+    num_trials = 100
 
     for p in p_values:
-        success_count = 0
+        percolates_count = 0
         for _ in range(num_trials):
-            lat = generate_lattice(L_large, p)
-            if has_percolation_top_to_bottom(lat):
-                success_count += 1
+            lat = generate_lattice(L, p)
+            if has_percolation_numba_large(lat):
+                percolates_count += 1
         
-        prob = success_count / num_trials
-        spanning_probs.append(prob)
+        prob = percolates_count / num_trials
+        y_values.append(prob)
         print(f"p={p:.2f} | P(spanning)={prob:.2f}")
 
     # Plotting
     plt.figure(figsize=(8, 5))
-    plt.plot(p_values, spanning_probs, 'o-', linewidth=2)
-    plt.axvline(x=0.5927, color='red', linestyle='--', label='Theoretical $p_c$')
-    plt.title(f"Percolation Probability (L={L_large})")
+    plt.plot(p_values, y_values, 'o-', linewidth=2)
+    plt.axvline(x=0.593, color='red', linestyle='--', label='Theoretical $p_c$')
+    plt.axvline(x=0.618, color='red', linestyle='--', label='RG Approx $p_c$')
+    plt.title(f"Percolation Probability (L={L})")
     plt.xlabel("p")
     plt.ylabel("P(spanning)")
     plt.legend()
     plt.grid(True)
-    plt.savefig("")
+    plt.savefig("percolation_probability.png")
 
 
 # Question 2.1.2: Decimation & Reshape
@@ -115,7 +180,7 @@ def decimate_spanning_rule(lattice):
     
     return path_exists
 
-def run_exercise_2_1_2():
+def solve_2_1_2():
     print("Running Exercise 2.1.2...")
     
     # Parameters explicitly requested
@@ -167,7 +232,7 @@ def run_exercise_2_1_2():
         results[p] = densities
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig("rg_flow_lattices.png")
 
     # 3. "Plot the percentage of active sites as a function of the decimation" [cite: 37]
     plt.figure(figsize=(10, 6))
@@ -196,5 +261,5 @@ def run_exercise_2_1_2():
     plt.show()
 
 if __name__ == "__main__":
-    # solve_2_1_1()
+    solve_2_1_1()
     solve_2_1_2()
