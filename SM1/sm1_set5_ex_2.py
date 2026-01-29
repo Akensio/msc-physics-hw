@@ -97,7 +97,6 @@ def solve_2_1_1():
     plt.figure(figsize=(8, 5))
     plt.plot(p_values, y_values, 'o-', linewidth=2)
     plt.axvline(x=0.593, color='red', linestyle='--', label='Theoretical $p_c$')
-    plt.axvline(x=0.618, color='red', linestyle='--', label='RG Approx $p_c$')
     plt.title(f"Percolation Probability (L={L})")
     plt.xlabel("p")
     plt.ylabel("P(spanning)")
@@ -146,11 +145,6 @@ def solve_2_1_2():
         
         # Decimations
         for gen in range(STEPS):
-            # Add column headers and row labels, but only on the edges.
-            if idx == 0:
-                axes[idx, gen].set_title(f"Gen {gen}\n($L={current_lattice.shape[0]}$)", fontsize=12, fontweight='bold')
-            if gen == 0:
-                axes[idx, gen].set_ylabel(f"$p = {p}$", fontsize=14, fontweight='bold', labelpad=10, rotation=90)
 
             # Calculate "percentage of active sites"
             density = np.mean(current_lattice)
@@ -158,9 +152,13 @@ def solve_2_1_2():
             
             # Plot the lattice
             ax = axes[idx, gen]
+            if idx == 0:
+                ax.set_title(f"Gen {gen}\n($L={current_lattice.shape[0]}$)", fontsize=12, fontweight='bold')
+            if gen == 0:
+                ax.set_ylabel(f"$p = {p}$", fontsize=14, fontweight='bold', labelpad=10, rotation=90)
             ax.imshow(current_lattice, cmap='binary', vmin=0, vmax=1)
-            ax.set_title(f"Active: {density:.1%}")
-            ax.axis('off')
+            ax.set_xticks([])
+            ax.set_yticks([])
             
             # Decimate for next round
             current_lattice = decimate_spanning_rule(current_lattice)
