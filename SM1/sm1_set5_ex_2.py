@@ -5,7 +5,7 @@ import numba
 
 
 def generate_lattice(L, p):
-    """Generates a LxL lattice with site probability p."""
+    """Generates a L*L lattice with site probability p."""
     return np.random.rand(L, L) < p
 
 
@@ -106,11 +106,10 @@ def solve_2_1_1():
     plt.savefig("percolation_probability.png")
 
 
-# Question 2.1.2: Decimation & Reshape
+# Question 2.1.2: Decimation
 def decimate_spanning_rule(lattice):
     """
     Coarse grains the lattice by a factor of 2 using the SPANNING rule.
-    (Mistakenly called 'majority' in the prompt text, but defined as connectivity).
     """
     L_y, L_x = lattice.shape
     new_L_y, new_L_x = L_y // 2, L_x // 2
@@ -118,15 +117,13 @@ def decimate_spanning_rule(lattice):
     # 1. Reshape to isolate 2x2 blocks
     # Shape: (Rows of blocks, 2, Cols of blocks, 2)
     view = lattice[:2*new_L_y, :2*new_L_x].reshape(new_L_y, 2, new_L_x, 2)
-    
-    # 2. Extract pixels
-    TL = view[:, 0, :, 0] # Top-Left
-    TR = view[:, 0, :, 1] # Top-Right
-    BL = view[:, 1, :, 0] # Bottom-Left
-    BR = view[:, 1, :, 1] # Bottom-Right
-    
-    # 3. Apply Vertical Path Rule
-    # Path exists if Left Col connects OR Right Col connects
+
+    TL = view[:, 0, :, 0]
+    TR = view[:, 0, :, 1]
+    BL = view[:, 1, :, 0]
+    BR = view[:, 1, :, 1]
+
+    # Path exists if left column connects OR right column connects
     path_exists = (TL & BL) | (TR & BR)
     
     return path_exists
@@ -193,5 +190,5 @@ def solve_2_1_2():
 
 
 if __name__ == "__main__":
-    # solve_2_1_1()
+    solve_2_1_1()
     solve_2_1_2()
