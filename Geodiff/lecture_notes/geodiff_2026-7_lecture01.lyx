@@ -1,0 +1,1512 @@
+#LyX file created by tex2lyx 2.5
+\lyxformat 643
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin C:/Users/gadib/source/repos/msc-physics-hw/Geodiff/lecture_notes/
+\textclass article
+\begin_preamble
+
+
+
+\end_preamble
+\use_default_options false
+\begin_modules
+theorems-ams
+\end_modules
+\maintain_unincluded_children no
+\language english
+\language_package none
+\inputencoding utf8
+\fontencoding T1
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_roman_osf false
+\font_sans_osf false
+\font_typewriter_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 11
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4
+\use_geometry true
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 0
+\use_package esint 1
+\use_package mathdots 0
+\use_package mathtools 0
+\use_package mhchem 0
+\use_package stackrel 0
+\use_package stmaryrd 0
+\use_package undertilde 0
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\crossref_package prettyref
+\use_minted 0
+\use_lineno false
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2.5cm
+\topmargin 2.5cm
+\rightmargin 2.5cm
+\bottommargin 2.5cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\change_bars false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\docbook_table_output 0
+\docbook_mathml_prefix 1
+\docbook_mathml_version 0
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Differential Geometry - Lecture 1
+\begin_inset Newline newline
+\end_inset
+
+ Differentiable Manifolds
+\end_layout
+
+\begin_layout Author
+Lecturer: Dr. Sybille Rosset
+\begin_inset Newline newline
+\end_inset
+
+Notes: Gadi Bessudo
+\end_layout
+
+\begin_layout Date
+19 October 2026
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\size small
+\shape italic
+About these notes:
+\shape default
+ Gadi Bessudo took the handwritten notes during the lecture, listening to the lecturer and copying from the board. Claude Opus 5.5 (Anthropic) then transcribed them into LyX, redrew the figures, and filled in a few explanations that were missed in class. Errors may come from either step.
+\end_layout
+
+\begin_layout Section
+Motivation: curves and surfaces in 
+\begin_inset Formula $\mathbb{R}^{3}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Curves
+\end_layout
+
+\begin_layout Standard
+A (parametrized) curve in 
+\begin_inset Formula $\mathbb{R}^{3}$
+\end_inset
+
+ is a differentiable map 
+\begin_inset Formula $\alpha:I\to\mathbb{R}^{3}$
+\end_inset
+
+, where 
+\begin_inset Formula $I\subset\mathbb{R}$
+\end_inset
+
+ is an open interval. Locally, a curve looks like a piece of 
+\begin_inset Formula $\mathbb{R}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+A closed curve 
+\begin_inset Formula $C$
+\end_inset
+
+, which has the shape of the circle 
+\begin_inset Formula $S^{1}$
+\end_inset
+
+, cannot be described by a single such map that is a homeomorphism onto 
+\begin_inset Formula $C$
+\end_inset
+
+ (
+\begin_inset Formula $S^{1}$
+\end_inset
+
+ is compact, an open interval is not). Instead we cover 
+\begin_inset Formula $C$
+\end_inset
+
+ by (at least) two parametrized pieces 
+\begin_inset Formula $\alpha_{1}(I_{1})$
+\end_inset
+
+ and 
+\begin_inset Formula $\alpha_{2}(I_{2})$
+\end_inset
+
+ which overlap (Figure
+\begin_inset space ~
+
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:curve"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics 
+	filename geodiff_2026-7_lecture01_figures/curve.pdf
+	width 60text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+A closed curve is covered by two overlapping parametrized arcs. Topologically it is a circle 
+\begin_inset Formula $S^{1}$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:curve"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is the main idea of the course: describe an object by overlapping pieces, each of which looks like an open piece of 
+\begin_inset Formula $\mathbb{R}^{n}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Regular surfaces
+\end_layout
+
+\begin_layout Definition
+A subset 
+\begin_inset Formula $S\subset\mathbb{R}^{3}$
+\end_inset
+
+ is a 
+\emph on
+regular surface
+\emph default
+ if for every point 
+\begin_inset Formula $p\in S$
+\end_inset
+
+ there exist a neighborhood 
+\begin_inset Formula $V\subset\mathbb{R}^{3}$
+\end_inset
+
+ of 
+\begin_inset Formula $p$
+\end_inset
+
+ and a map 
+\begin_inset Formula $\mathbf{x}:U\to V\cap S$
+\end_inset
+
+ of an open set 
+\begin_inset Formula $U\subset\mathbb{R}^{2}$
+\end_inset
+
+ onto 
+\begin_inset Formula $V\cap S$
+\end_inset
+
+ such that 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+(a)
+\end_layout
+
+\end_inset
+
+
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+ is differentiable and a homeomorphism (it has a continuous inverse 
+\begin_inset Formula $\mathbf{x}^{-1}:V\cap S\to U$
+\end_inset
+
+); 
+\end_layout
+
+\begin_layout Enumerate
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+(b)
+\end_layout
+
+\end_inset
+
+(regularity) the differential 
+\begin_inset Formula $(d\mathbf{x})_{q}:\mathbb{R}^{2}\to\mathbb{R}^{3}$
+\end_inset
+
+ is injective for all 
+\begin_inset Formula $q\in U$
+\end_inset
+
+. 
+\end_layout
+
+\end_deeper
+\begin_layout Definition
+The map 
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+ is called a 
+\emph on
+parametrization
+\emph default
+ of 
+\begin_inset Formula $S$
+\end_inset
+
+ at 
+\begin_inset Formula $p$
+\end_inset
+
+, and 
+\begin_inset Formula $V\cap S$
+\end_inset
+
+ a 
+\emph on
+coordinate neighborhood
+\emph default
+ of 
+\begin_inset Formula $p$
+\end_inset
+
+. 
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics 
+	filename geodiff_2026-7_lecture01_figures/surface.pdf
+	width 75text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+A parametrization 
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+ maps an open set 
+\begin_inset Formula $U\subset\mathbb{R}^{2}$
+\end_inset
+
+ onto a neighborhood 
+\begin_inset Formula $V\cap S$
+\end_inset
+
+ of 
+\begin_inset Formula $p$
+\end_inset
+
+ in 
+\begin_inset Formula $S$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:surface"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Intuition: (a) says that 
+\begin_inset Formula $V\cap S$
+\end_inset
+
+ is just a deformed open piece of the plane, with nothing torn or glued. (b) says that the two partial derivatives 
+\begin_inset Formula $\mathbf{x}_{u},\mathbf{x}_{v}$
+\end_inset
+
+ are linearly independent, so 
+\begin_inset Formula $S$
+\end_inset
+
+ has a tangent plane at every point (no cusps or edges). Note that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+ is differentiable
+\begin_inset Quotes erd
+\end_inset
+
+ makes sense only because 
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+ takes values in the ambient space 
+\begin_inset Formula $\mathbb{R}^{3}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Example
+The following are regular surfaces: 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+the sphere 
+\begin_inset Formula $S^{2}=\left\{ x^{2}+y^{2}+z^{2}=1\right\} \subset\mathbb{R}^{3}$
+\end_inset
+
+ (covered for example by six graphs 
+\begin_inset Formula $\mathbf{x}(u,v)=(u,v,\pm\sqrt{1-u^{2}-v^{2}})$
+\end_inset
+
+ over the open unit disk, and the analogous ones with the roles of 
+\begin_inset Formula $x,y,z$
+\end_inset
+
+ exchanged); 
+\end_layout
+
+\begin_layout Itemize
+the plane 
+\begin_inset Formula $\left\{ z=0\right\} $
+\end_inset
+
+, with the single parametrization 
+\begin_inset Formula $\mathbf{x}(u,v)=(u,v,0)$
+\end_inset
+
+; 
+\end_layout
+
+\begin_layout Itemize
+every plane 
+\begin_inset Formula $\left\{ ax+by+cz+d=0\right\} \subset\mathbb{R}^{3}$
+\end_inset
+
+ with 
+\begin_inset Formula $(a,b,c)\neq(0,0,0)$
+\end_inset
+
+. 
+\end_layout
+
+\end_deeper
+\begin_layout Remark
+
+\begin_inset Argument 1
+status collapsed
+
+
+\begin_layout Standard
+Change of parameters
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "rem:change"
+
+\end_inset
+
+Let 
+\begin_inset Formula $\mathbf{x}_{\alpha}:U_{\alpha}\to S$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{x}_{\beta}:U_{\beta}\to S$
+\end_inset
+
+ be two parametrizations with 
+\begin_inset Formula $W=\mathbf{x}_{\alpha}(U_{\alpha})\cap\mathbf{x}_{\beta}(U_{\beta})\neq\emptyset$
+\end_inset
+
+. Then the changes of parameters 
+\begin_inset Formula \[
+\mathbf{x}_{\alpha}^{-1}\circ\mathbf{x}_{\beta}:\mathbf{x}_{\beta}^{-1}(W)\to\mathbf{x}_{\alpha}^{-1}(W)\subset\mathbb{R}^{2}
+\]
+\end_inset
+
+
+\begin_inset Formula \[
+\mathbf{x}_{\beta}^{-1}\circ\mathbf{x}_{\alpha}:\mathbf{x}_{\alpha}^{-1}(W)\to\mathbf{x}_{\beta}^{-1}(W)\subset\mathbb{R}^{2}
+\]
+\end_inset
+
+are differentiable (Figure
+\begin_inset space ~
+
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:transition"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Remark
+For a regular surface this is a theorem, and its proof uses the ambient 
+\begin_inset Formula $\mathbb{R}^{3}$
+\end_inset
+
+. For an abstract set 
+\begin_inset Formula $M$
+\end_inset
+
+ there is no ambient space, so 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $\mathbf{x}_{\alpha}$
+\end_inset
+
+ is differentiable
+\begin_inset Quotes erd
+\end_inset
+
+ has no meaning. The only maps we can still ask to be differentiable are the changes of parameters, since they go between open subsets of 
+\begin_inset Formula $\mathbb{R}^{n}$
+\end_inset
+
+. This property becomes an axiom in the next definition. 
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics 
+	filename geodiff_2026-7_lecture01_figures/transition.pdf
+	width 62text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Two overlapping parametrizations. The changes of parameters 
+\begin_inset Formula $\mathbf{x}_{\beta}^{-1}\circ\mathbf{x}_{\alpha}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{x}_{\alpha}^{-1}\circ\mathbf{x}_{\beta}$
+\end_inset
+
+ are maps between open subsets of 
+\begin_inset Formula $\mathbb{R}^{n}$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:transition"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Differentiable manifolds in 
+\begin_inset Formula $n$
+\end_inset
+
+ dimensions
+\end_layout
+
+\begin_layout Definition
+A 
+\emph on
+differentiable manifold
+\emph default
+ of dimension 
+\begin_inset Formula $n$
+\end_inset
+
+ is a set 
+\begin_inset Formula $M$
+\end_inset
+
+ together with a family of injective mappings 
+\begin_inset Formula $\mathbf{x}_{\alpha}:U_{\alpha}\to M$
+\end_inset
+
+ of open sets 
+\begin_inset Formula $U_{\alpha}\subset\mathbb{R}^{n}$
+\end_inset
+
+ into 
+\begin_inset Formula $M$
+\end_inset
+
+ such that 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+(1)
+\end_layout
+
+\end_inset
+
+
+\begin_inset Formula $\bigcup_{\alpha}\mathbf{x}_{\alpha}(U_{\alpha})=M$
+\end_inset
+
+; 
+\end_layout
+
+\begin_layout Enumerate
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+(2)
+\end_layout
+
+\end_inset
+
+for all 
+\begin_inset Formula $\alpha,\beta$
+\end_inset
+
+ with 
+\begin_inset Formula $W=\mathbf{x}_{\alpha}(U_{\alpha})\cap\mathbf{x}_{\beta}(U_{\beta})\neq\emptyset$
+\end_inset
+
+, the sets 
+\begin_inset Formula $\mathbf{x}_{\alpha}^{-1}(W)$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{x}_{\beta}^{-1}(W)$
+\end_inset
+
+ are open subsets of 
+\begin_inset Formula $\mathbb{R}^{n}$
+\end_inset
+
+, and 
+\begin_inset Formula $\mathbf{x}_{\beta}^{-1}\circ\mathbf{x}_{\alpha}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{x}_{\alpha}^{-1}\circ\mathbf{x}_{\beta}$
+\end_inset
+
+ are differentiable functions; 
+\end_layout
+
+\begin_layout Enumerate
+
+\begin_inset Argument item:1
+status collapsed
+
+
+\begin_layout Standard
+(3)
+\end_layout
+
+\end_inset
+
+the family 
+\begin_inset Formula $\left\{ (U_{\alpha},\mathbf{x}_{\alpha})\right\} $
+\end_inset
+
+ is maximal relative to conditions (1) and (2). 
+\end_layout
+
+\end_deeper
+\begin_layout Definition
+The pair 
+\begin_inset Formula $(U_{\alpha},\mathbf{x}_{\alpha})$
+\end_inset
+
+ with 
+\begin_inset Formula $p\in\mathbf{x}_{\alpha}(U_{\alpha})$
+\end_inset
+
+ is called a 
+\emph on
+parametrization
+\emph default
+ (or system of coordinates) of 
+\begin_inset Formula $M$
+\end_inset
+
+ at 
+\begin_inset Formula $p$
+\end_inset
+
+. A family 
+\begin_inset Formula $\left\{ (U_{\alpha},\mathbf{x}_{\alpha})\right\} $
+\end_inset
+
+ satisfying (1) and (2) is called a 
+\emph on
+differentiable structure
+\emph default
+ on 
+\begin_inset Formula $M$
+\end_inset
+
+. 
+\end_layout
+
+\begin_layout Standard
+Here 
+\begin_inset Quotes eld
+\end_inset
+
+differentiable
+\begin_inset Quotes erd
+\end_inset
+
+ means 
+\begin_inset Formula $C^{\infty}$
+\end_inset
+
+. Condition (1) says the parametrizations cover 
+\begin_inset Formula $M$
+\end_inset
+
+, and condition (2) is the compatibility of Remark
+\begin_inset space ~
+
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "rem:change"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+tuple "list"
+
+\end_inset
+
+, now imposed as an axiom.
+\end_layout
+
+\begin_layout Remark
+
+\begin_inset Argument 1
+status collapsed
+
+
+\begin_layout Standard
+On maximality
+\end_layout
+
+\end_inset
+
+Condition (3) is about the family of parametrizations, not about the size of the sets 
+\begin_inset Formula $U_{\alpha}$
+\end_inset
+
+: any parametrization 
+\begin_inset Formula $\mathbf{y}:U\to M$
+\end_inset
+
+ that satisfies (2) together with every member of the family is already in the family. It is purely technical: a family satisfying (1) and (2) can always be completed to a maximal one by adding all parametrizations compatible with it. So in practice we define a manifold by giving a differentiable structure, as in the examples below. 
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Separator plain
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Remark
+
+\begin_inset Argument 1
+status collapsed
+
+
+\begin_layout Standard
+Topology on 
+\begin_inset Formula $M$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Formula $M$
+\end_inset
+
+ is only a set, no topology is given. A differentiable structure induces one: declare 
+\begin_inset Formula $A\subset M$
+\end_inset
+
+ to be 
+\emph on
+open
+\emph default
+ if and only if 
+\begin_inset Formula \[
+\mathbf{x}_{\alpha}^{-1}\left(A\cap\mathbf{x}_{\alpha}(U_{\alpha})\right)\text{ is open in }\mathbb{R}^{n}\text{ for all }\alpha
+\]
+\end_inset
+
+With this topology the sets 
+\begin_inset Formula $\mathbf{x}_{\alpha}(U_{\alpha})$
+\end_inset
+
+ are open and the maps 
+\begin_inset Formula $\mathbf{x}_{\alpha}$
+\end_inset
+
+ are continuous. 
+\end_layout
+
+\begin_layout Section
+Example: the real projective space
+\end_layout
+
+\begin_layout Definition
+The real projective space of dimension 
+\begin_inset Formula $n$
+\end_inset
+
+ is 
+\begin_inset Formula \[
+\mathbb{R}P^{n}:=\left\{ \text{lines through the origin in }\mathbb{R}^{n+1}\right\} =\left(\mathbb{R}^{n+1}\setminus\left\{ 0\right\} \right)/\sim
+\]
+\end_inset
+
+where 
+\begin_inset Formula $u\sim\lambda u$
+\end_inset
+
+ for all 
+\begin_inset Formula $\lambda\in\mathbb{R}^{*}=\mathbb{R}\setminus\left\{ 0\right\} $
+\end_inset
+
+. We write 
+\begin_inset Formula $[x_{0},\dots,x_{n}]$
+\end_inset
+
+ for the class of 
+\begin_inset Formula $(x_{0},\dots,x_{n})$
+\end_inset
+
+. 
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics 
+	filename geodiff_2026-7_lecture01_figures/projective.pdf
+	width 75text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Left: every line through the origin of 
+\begin_inset Formula $\mathbb{R}^{2}$
+\end_inset
+
+ meets the upper half circle once, except the horizontal line, which meets both endpoints. Gluing the endpoints gives 
+\begin_inset Formula $\mathbb{R}P^{1}\cong S^{1}$
+\end_inset
+
+. Right: every line through the origin of 
+\begin_inset Formula $\mathbb{R}^{3}$
+\end_inset
+
+ meets 
+\begin_inset Formula $S^{2}$
+\end_inset
+
+ in two antipodal points 
+\begin_inset Formula $\pm u$
+\end_inset
+
+, so 
+\begin_inset Formula $\mathbb{R}P^{2}=S^{2}/(u\sim-u)$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:projective"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Parametrizations.
+\end_layout
+
+\begin_layout Standard
+If 
+\begin_inset Formula $x_{0}\neq0$
+\end_inset
+
+ we can choose 
+\begin_inset Formula $\lambda=1/x_{0}$
+\end_inset
+
+: 
+\begin_inset Formula \[
+[x_{0},x_{1},\dots,x_{n}]=\left[1,\frac{x_{1}}{x_{0}},\dots,\frac{x_{n}}{x_{0}}\right]
+\]
+\end_inset
+
+so such a point is determined by 
+\begin_inset Formula $n$
+\end_inset
+
+ real numbers. Define 
+\begin_inset Formula \[
+V_{0}:=\left\{ [x_{0},\dots,x_{n}]\mid x_{0}\neq0\right\}
+\]
+\end_inset
+
+and 
+\begin_inset Formula $\mathbf{x}_{0}:\mathbb{R}^{n}\to V_{0}$
+\end_inset
+
+ by 
+\begin_inset Formula \[
+\mathbf{x}_{0}(x_{1},\dots,x_{n})=[1,x_{1},\dots,x_{n}]
+\]
+\end_inset
+
+which is injective (in fact a bijection onto 
+\begin_inset Formula $V_{0}$
+\end_inset
+
+). In the same way, for 
+\begin_inset Formula $i=0,\dots,n$
+\end_inset
+
+, let 
+\begin_inset Formula \[
+V_{i}:=\left\{ [x_{0},\dots,x_{n}]\mid x_{i}\neq0\right\}
+\]
+\end_inset
+
+and 
+\begin_inset Formula $\mathbf{x}_{i}:\mathbb{R}^{n}\to V_{i}$
+\end_inset
+
+ (insert a 
+\begin_inset Formula $1$
+\end_inset
+
+ in slot 
+\begin_inset Formula $i$
+\end_inset
+
+) 
+\begin_inset Formula \[
+\mathbf{x}_{i}(y_{0},\dots,y_{i-1},y_{i+1},\dots,y_{n})=[y_{0},\dots,y_{i-1},1,y_{i+1},\dots,y_{n}]
+\]
+\end_inset
+
+with inverse 
+\begin_inset Formula \[
+\mathbf{x}_{i}^{-1}:[x_{0},\dots,x_{n}]\mapsto\left(\frac{x_{0}}{x_{i}},\dots,\frac{x_{i-1}}{x_{i}},\frac{x_{i+1}}{x_{i}},\dots,\frac{x_{n}}{x_{i}}\right)
+\]
+\end_inset
+
+which does not depend on the representative (multiplying all 
+\begin_inset Formula $x_{k}$
+\end_inset
+
+ by 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ does not change the ratios).
+\end_layout
+
+\begin_layout Paragraph
+Condition (1).
+\end_layout
+
+\begin_layout Standard
+Every 
+\begin_inset Formula $u\neq0$
+\end_inset
+
+ has some nonzero coordinate, so 
+\begin_inset Formula \[
+\bigcup_{i=0}^{n}V_{i}=\mathbb{R}P^{n}
+\]
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Condition (2).
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $i\neq j$
+\end_inset
+
+. A point 
+\begin_inset Formula $\mathbf{x}_{j}(y)$
+\end_inset
+
+ lies in 
+\begin_inset Formula $V_{i}$
+\end_inset
+
+ iff its 
+\begin_inset Formula $i$
+\end_inset
+
+-th entry is nonzero, so 
+\begin_inset Formula \[
+\mathbf{x}_{j}^{-1}(V_{i}\cap V_{j})=\left\{ (y_{0},\dots,y_{j-1},y_{j+1},\dots,y_{n})\in\mathbb{R}^{n}\mid y_{i}\neq0\right\}
+\]
+\end_inset
+
+is open in 
+\begin_inset Formula $\mathbb{R}^{n}$
+\end_inset
+
+ (the entry 
+\begin_inset Formula $y_{j}$
+\end_inset
+
+ is omitted). On this set 
+\begin_inset Formula \[
+\mathbf{x}_{i}^{-1}\circ\mathbf{x}_{j}(y_{0},\dots,y_{j-1},y_{j+1},\dots,y_{n})=\left(\frac{y_{0}}{y_{i}},\dots,\frac{y_{j-1}}{y_{i}},\frac{1}{y_{i}},\frac{y_{j+1}}{y_{i}},\dots,\frac{y_{n}}{y_{i}}\right)
+\]
+\end_inset
+
+where the entry 
+\begin_inset Formula $1/y_{i}$
+\end_inset
+
+ sits in slot 
+\begin_inset Formula $j$
+\end_inset
+
+ and the entry 
+\begin_inset Formula $y_{i}/y_{i}=1$
+\end_inset
+
+ (slot 
+\begin_inset Formula $i$
+\end_inset
+
+) is omitted. All components are rational functions with nonvanishing denominator, hence differentiable.
+\end_layout
+
+\begin_layout Standard
+So 
+\begin_inset Formula $\left\{ (\mathbb{R}^{n},\mathbf{x}_{i})\right\} _{i=0}^{n}$
+\end_inset
+
+ is a differentiable structure, and 
+\begin_inset Formula $\mathbb{R}P^{n}$
+\end_inset
+
+ is a differentiable manifold of dimension 
+\begin_inset Formula $n$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Differentiable maps between manifolds
+\end_layout
+
+\begin_layout Standard
+Our next goal is to say when two manifolds are 
+\begin_inset Quotes eld
+\end_inset
+
+the same
+\begin_inset Quotes erd
+\end_inset
+
+ (isomorphic). For this we first need differentiable maps between manifolds. Differentiability of a map on 
+\begin_inset Formula $M$
+\end_inset
+
+ can only be tested through parametrizations, i.e. by going down to 
+\begin_inset Formula $\mathbb{R}^{n}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Definition
+Let 
+\begin_inset Formula $M_{1}^{n}$
+\end_inset
+
+ and 
+\begin_inset Formula $M_{2}^{m}$
+\end_inset
+
+ be differentiable manifolds of dimensions 
+\begin_inset Formula $n$
+\end_inset
+
+ and 
+\begin_inset Formula $m$
+\end_inset
+
+. A mapping 
+\begin_inset Formula $\varphi:M_{1}\to M_{2}$
+\end_inset
+
+ is 
+\emph on
+differentiable at
+\emph default
+ 
+\begin_inset Formula $p\in M_{1}$
+\end_inset
+
+ if given a parametrization 
+\begin_inset Formula $\mathbf{y}:V\subset\mathbb{R}^{m}\to M_{2}$
+\end_inset
+
+ at 
+\begin_inset Formula $\varphi(p)$
+\end_inset
+
+ there exists a parametrization 
+\begin_inset Formula $\mathbf{x}:U\subset\mathbb{R}^{n}\to M_{1}$
+\end_inset
+
+ at 
+\begin_inset Formula $p$
+\end_inset
+
+ such that 
+\begin_inset Formula $\varphi(\mathbf{x}(U))\subset\mathbf{y}(V)$
+\end_inset
+
+ and the mapping 
+\begin_inset Formula \[
+\mathbf{y}^{-1}\circ\varphi\circ\mathbf{x}:U\subset\mathbb{R}^{n}\to\mathbb{R}^{m}
+\]
+\end_inset
+
+is differentiable at 
+\begin_inset Formula $\mathbf{x}^{-1}(p)$
+\end_inset
+
+. A mapping which is differentiable at all points of 
+\begin_inset Formula $M_{1}$
+\end_inset
+
+ is called 
+\emph on
+differentiable
+\emph default
+. 
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics 
+	filename geodiff_2026-7_lecture01_figures/diffmap.pdf
+	width 75text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Formula $\varphi$
+\end_inset
+
+ is differentiable at 
+\begin_inset Formula $p$
+\end_inset
+
+ if its expression in coordinates, 
+\begin_inset Formula $\mathbf{y}^{-1}\circ\varphi\circ\mathbf{x}$
+\end_inset
+
+, is differentiable at 
+\begin_inset Formula $\mathbf{x}^{-1}(p)$
+\end_inset
+
+. This is a map between open subsets of 
+\begin_inset Formula $\mathbb{R}^{n}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbb{R}^{m}$
+\end_inset
+
+, where we know what differentiable means.
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:diffmap"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The condition 
+\begin_inset Formula $\varphi(\mathbf{x}(U))\subset\mathbf{y}(V)$
+\end_inset
+
+ makes the composition 
+\begin_inset Formula $\mathbf{y}^{-1}\circ\varphi\circ\mathbf{x}$
+\end_inset
+
+ defined on all of 
+\begin_inset Formula $U$
+\end_inset
+
+. This is why 
+\begin_inset Formula $\mathbf{y}$
+\end_inset
+
+ is chosen first and then 
+\begin_inset Formula $U$
+\end_inset
+
+ is taken small enough.
+\end_layout
+
+\begin_layout Paragraph
+Question.
+\end_layout
+
+\begin_layout Standard
+Does differentiability of 
+\begin_inset Formula $\varphi:M_{1}\to M_{2}$
+\end_inset
+
+ depend on the choices made? 
+\end_layout
+
+\begin_layout Itemize
+It does 
+\emph on
+not
+\emph default
+ depend on the choice of parametrizations. If 
+\begin_inset Formula $\mathbf{x}',\mathbf{y}'$
+\end_inset
+
+ are other parametrizations at 
+\begin_inset Formula $p$
+\end_inset
+
+ and 
+\begin_inset Formula $\varphi(p)$
+\end_inset
+
+, then near 
+\begin_inset Formula $\mathbf{x}'^{-1}(p)$
+\end_inset
+
+ 
+\begin_inset Formula \[
+\mathbf{y}'^{-1}\circ\varphi\circ\mathbf{x}'=\left(\mathbf{y}'^{-1}\circ\mathbf{y}\right)\circ\left(\mathbf{y}^{-1}\circ\varphi\circ\mathbf{x}\right)\circ\left(\mathbf{x}^{-1}\circ\mathbf{x}'\right)
+\]
+\end_inset
+
+and the outer two factors are changes of parameters, differentiable by condition (2). This is exactly why (2) is part of the definition. 
+\end_layout
+
+\begin_layout Itemize
+It 
+\emph on
+does
+\emph default
+ depend on the differentiable structures. For example, on 
+\begin_inset Formula $M=\mathbb{R}$
+\end_inset
+
+ take the structure generated by 
+\begin_inset Formula $\mathbf{x}(t)=t$
+\end_inset
+
+ and the one generated by 
+\begin_inset Formula $\mathbf{y}(t)=t^{3}$
+\end_inset
+
+. Then 
+\begin_inset Formula $\mathbf{y}^{-1}\circ\mathrm{id}\circ\mathbf{x}(t)=t^{1/3}$
+\end_inset
+
+ is not differentiable at 
+\begin_inset Formula $0$
+\end_inset
+
+, so 
+\begin_inset Formula $\mathrm{id}:(\mathbb{R},\mathbf{x})\to(\mathbb{R},\mathbf{y})$
+\end_inset
+
+ is not differentiable, and the two structures are different. (Still, 
+\begin_inset Formula $\varphi(t)=t^{3}$
+\end_inset
+
+ from 
+\begin_inset Formula $(\mathbb{R},\mathbf{x})$
+\end_inset
+
+ to 
+\begin_inset Formula $(\mathbb{R},\mathbf{y})$
+\end_inset
+
+ is differentiable with differentiable inverse, since in coordinates both read 
+\begin_inset Formula $t\mapsto t$
+\end_inset
+
+. So the two manifolds are 
+\begin_inset Quotes eld
+\end_inset
+
+the same
+\begin_inset Quotes erd
+\end_inset
+
+, which leads to the notion of isomorphism we are after.) 
+\end_layout
+
+\end_body
+\end_document

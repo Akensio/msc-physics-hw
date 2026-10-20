@@ -1,0 +1,13 @@
+% Shared TikZ style for lecture figures
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,calc,decorations.pathreplacing,patterns}
+\definecolor{teal}{RGB}{38,150,140}
+\definecolor{coral}{RGB}{230,95,75}
+\definecolor{ink}{RGB}{20,45,60}
+\tikzset{
+  >={Stealth[length=2.6mm]},
+  every picture/.style={line cap=round,line join=round,thick,ink},
+  map/.style={->,thick},
+  dot/.style={circle,fill,inner sep=1.2pt},
+}
